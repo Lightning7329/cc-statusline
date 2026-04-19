@@ -1,0 +1,16 @@
+{
+    "workbench.colorCustomizations": {
+        "statusBar.background": "#30B9DB",
+        "statusBarItem.remoteBackground": "#378BBA",
+        "button.background": "#30B9DB",
+        "activityBarBadge.background": "#30B9DB",
+        "editor.lineHighlightBackground": "#30b9db28",
+    },
+    "files.associations": {
+        "*.fsproj": "xml"
+    },
+    "github.copilot.nextEditSuggestions.enabled": false,
+    "FSharp.fsac.cachedTypeCheckCount": 50,
+    "FSharp.fcs.transparentCompiler.enabled": false,
+    "FSharp.enableAnalyzers": false,
+}

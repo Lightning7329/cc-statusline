@@ -1,0 +1,4 @@
+[*.{fs,fsx}]
+fsharp_multiline_bracket_style = stroustrup
+# fsharp_multiline_bracket_style = Cramped
+fsharp_keep_max_number_of_blank_lines = 2
