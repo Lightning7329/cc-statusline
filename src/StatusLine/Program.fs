@@ -1,1 +1,1 @@
-﻿printfn "Hello, F#"
+﻿stdin.ReadToEnd() |> StatusLine.StatusLineBuilder.buildFromInput |> printfn "%s"
