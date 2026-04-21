@@ -9,6 +9,7 @@
     "files.associations": {
         "*.fsproj": "xml"
     },
+    "terminal.integrated.defaultProfile.linux": "zsh",
     "github.copilot.nextEditSuggestions.enabled": false,
     "FSharp.fsac.cachedTypeCheckCount": 50,
     "FSharp.fcs.transparentCompiler.enabled": false,
