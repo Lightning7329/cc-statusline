@@ -4,11 +4,11 @@
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>statusline</AssemblyName>
     <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
     <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Utils/DateTime.fs" />
+    <Compile Include="Utils/WorkingDirectory.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="StatusLineBuilder.fs" />
     <Compile Include="Program.fs" />
