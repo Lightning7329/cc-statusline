@@ -56,22 +56,22 @@ let ``MM/dd HH:mm形式でリセット時刻をフォーマットする`` () =
 let ``formatFiveHourはHH:mm形式を使う`` () =
     let seg =
         formatFiveHour (
-            {
+            Some {
                 UsedPercentage = 0.0
                 ResetsAt = testTimestamp
             }
         )
 
-    seg.Text |> should equal "0.0% (reset at 00:00)"
+    seg.Value.Text |> should equal "0.0% (reset at 00:00)"
 
 [<Fact>]
 let ``formatSevenDayはMM/dd HH:mm形式を使う`` () =
     let seg =
         formatSevenDay (
-            {
+            Some {
                 UsedPercentage = 0.0
                 ResetsAt = testTimestamp
             }
         )
 
-    seg.Text |> should equal "0.0% (reset at 02/02 00:00)"
+    seg.Value.Text |> should equal "0.0% (reset at 02/02 00:00)"

@@ -11,6 +11,7 @@ type Workspace = {
     CurrentDir: string
     ProjectDir: string
     AddedDirs: string list
+    GitWorktree: string option
 }
 
 type OutputStyle = { Name: string }
@@ -34,9 +35,9 @@ type ContextWindow = {
     TotalInputTokens: int
     TotalOutputTokens: int
     ContextWindowSize: int
-    UsedPercentage: int
-    RemainingPercentage: int
-    CurrentUsage: CurrentUsage
+    UsedPercentage: int option
+    RemainingPercentage: int option
+    CurrentUsage: CurrentUsage option
 }
 
 type RateLimitEntry = {
@@ -45,8 +46,8 @@ type RateLimitEntry = {
 }
 
 type RateLimits = {
-    FiveHour: RateLimitEntry
-    SevenDay: RateLimitEntry
+    FiveHour: RateLimitEntry option
+    SevenDay: RateLimitEntry option
 }
 
 type VimMode = { Mode: string }
@@ -64,7 +65,7 @@ type Worktree = {
 type Context = {
     Cwd: string
     SessionId: string
-    SessionName: string
+    SessionName: string option
     TranscriptPath: string
     Model: Model
     Workspace: Workspace
@@ -74,7 +75,7 @@ type Context = {
     ContextWindow: ContextWindow
     [<JsonPropertyName("exceeds_200k_tokens")>]
     Exceeds200kTokens: bool
-    RateLimits: RateLimits
+    RateLimits: RateLimits option
     Vim: VimMode option
     Agent: Agent option
     Worktree: Worktree option

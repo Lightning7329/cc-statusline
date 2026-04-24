@@ -7,8 +7,16 @@ open StatusLine.Segments
 open StatusLine.ColoredOutput
 
 let private jsonOptions =
-    let opts = JsonSerializerOptions(PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower)
-    opts.Converters.Add(JsonFSharpConverter())
+    let opts =
+        JsonSerializerOptions(PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower)
+
+    let fsOpt =
+        JsonFSharpOptions
+            .Default()
+            .WithSkippableOptionFields(SkippableOptionFields.Always, deserializeNullAsNone = true)
+
+    opts.Converters.Add(JsonFSharpConverter fsOpt)
+
     opts
 
 let parseInput (input: string) =
@@ -18,8 +26,15 @@ let build (c: Context) =
     let cwdText = Cwd.format c.Cwd
     let modelText = ModelName.format c.Model
     let costText = CostDisplay.format c.Cost |> applyColor
-    let fiveText = RateLimit.formatFiveHour c.RateLimits.FiveHour |> applyColor
-    let sevenText = RateLimit.formatSevenDay c.RateLimits.SevenDay |> applyColor
-    [ cwdText; modelText; costText; fiveText; sevenText ] |> String.concat " | "
+
+    let fiveHourEntry = c.RateLimits |> Option.bind _.FiveHour
+    let sevenDayEntry = c.RateLimits |> Option.bind _.SevenDay
+
+    let fiveText = RateLimit.formatFiveHour fiveHourEntry |> Option.map applyColor
+    let sevenText = RateLimit.formatSevenDay sevenDayEntry |> Option.map applyColor
+
+    [ Some cwdText; Some modelText; Some costText; fiveText; sevenText ]
+    |> List.choose id
+    |> String.concat " | "
 
 let buildFromInput = parseInput >> build
