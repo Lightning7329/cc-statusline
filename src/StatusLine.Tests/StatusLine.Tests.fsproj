@@ -5,7 +5,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Utils/WorkingDirectoryTests.fs" />
-    <Compile Include="Tests.fs" />
+    <Compile Include="ColorTests.fs" />
+    <Compile Include="Segments/CwdTests.fs" />
+    <Compile Include="Segments/ModelNameTests.fs" />
+    <Compile Include="Segments/CostDisplayTests.fs" />
+    <Compile Include="Segments/RateLimitTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../StatusLine/StatusLine.fsproj" />

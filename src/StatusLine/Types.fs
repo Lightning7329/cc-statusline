@@ -1,6 +1,9 @@
 module StatusLine.Types
 
+open System.Drawing
 open System.Text.Json.Serialization
+
+type Segment = { Text: string; Color: Color option }
 
 type Model = { Id: string; DisplayName: string }
 
