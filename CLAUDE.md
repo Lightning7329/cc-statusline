@@ -49,7 +49,7 @@ stdin JSON → tryParseInput (Result<Context, ContextDeserializeError>)
 ### モジュール構成
 
 - **Types.fs** — 全レコード型・判別共用体（`Context`, `Segment`, `ContextDeserializeError` 等）
-- **Color.fs** — `percentageToColor: float → Color`（0%=緑 → 100%=赤のグラデーション）
+- **Color.fs** — `percentageToColor: float → Color`（0%=緑 → 100%=赤のグラデーション、OKLCH 色空間で補間。Wacton.Unicolour 使用）
 - **Segments/** — 各セグメントの純粋なフォーマッタ（`Cwd`, `ModelName`, `CostDisplay`, `RateLimit`）
 - **Utils/** — ヘルパー（`DateTime`：JST変換、`WorkingDirectory`：パス正規化）
 - **StatusLineBuilder.fs** — JSON パース（`tryParseInput`）とセグメント組み立て（`build`）のオーケストレーション

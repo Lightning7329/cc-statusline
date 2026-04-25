@@ -2,8 +2,13 @@
     "version": "0.2",
     "language": "en",
     "words": [
+        "Argb",
+        "Colour",
         "fantomas",
+        "Oklch",
         "statusline",
+        "Unicolour",
+        "Wacton",
         "Worktree"
     ]
 }

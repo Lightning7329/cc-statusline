@@ -19,10 +19,10 @@ let ``100.0は赤(255, 0, 0)を返す`` () =
     int c.B |> should equal 0
 
 [<Fact>]
-let ``50.0は中間色(127, 127, 0)を返す`` () =
+let ``50.0はOKLCH補間による中間色を返す`` () =
     let c = percentageToColor 50.0
-    int c.R |> should equal 127
-    int c.G |> should equal 127
+    int c.R |> should equal 221
+    int c.G |> should equal 162
     int c.B |> should equal 0
 
 [<Fact>]
