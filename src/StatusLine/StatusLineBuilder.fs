@@ -4,7 +4,8 @@ open System.Drawing
 open System.Text.Json
 open System.Text.Json.Serialization
 open Pastel
-open StatusLine.Types
+open StatusLine.Types.Context
+open StatusLine.Types.App
 open StatusLine.Segments
 open StatusLine.ColoredOutput
 

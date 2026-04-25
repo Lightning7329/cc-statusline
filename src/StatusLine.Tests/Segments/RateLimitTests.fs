@@ -2,7 +2,8 @@ module StatusLine.Tests.Segments.RateLimitTests
 
 open Xunit
 open FsUnit.Xunit
-open StatusLine.Types
+open StatusLine.Types.Context
+open StatusLine.Types.App
 open StatusLine.Segments.RateLimit
 
 // 1738422000 = 2025-02-01 15:00:00 UTC = 2025-02-02 00:00:00 JST

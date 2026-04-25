@@ -1,6 +1,7 @@
 module StatusLine.Segments.RateLimit
 
-open StatusLine.Types
+open StatusLine.Types.Context
+open StatusLine.Types.App
 
 let formatEntry (dateFormat: string) (entry: RateLimitEntry) : Segment =
     let resetTime =

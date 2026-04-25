@@ -1,6 +1,7 @@
 module StatusLine.Segments.CostDisplay
 
-open StatusLine.Types
+open StatusLine.Types.Context
+open StatusLine.Types.App
 
 let format (cost: Cost) : Segment = {
     Text = sprintf "$%.4f" cost.TotalCostUsd

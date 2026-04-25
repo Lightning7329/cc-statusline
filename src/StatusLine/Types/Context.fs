@@ -1,9 +1,6 @@
-module StatusLine.Types
+module StatusLine.Types.Context
 
-open System.Drawing
 open System.Text.Json.Serialization
-
-type Segment = { Text: string; Color: Color option }
 
 type Model = { Id: string; DisplayName: string }
 
@@ -61,10 +58,6 @@ type Worktree = {
     OriginalCwd: string
     OriginalBranch: string
 }
-
-type ContextDeserializeError =
-    | InvalidJson of message: string
-    | MissingOrInvalidField of message: string
 
 type Context = {
     Cwd: string

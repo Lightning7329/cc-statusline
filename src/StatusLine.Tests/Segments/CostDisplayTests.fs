@@ -2,7 +2,8 @@ module StatusLine.Tests.Segments.CostDisplayTests
 
 open Xunit
 open FsUnit.Xunit
-open StatusLine.Types
+open StatusLine.Types.Context
+open StatusLine.Types.App
 open StatusLine.Segments.CostDisplay
 
 let private makeCost usd = {

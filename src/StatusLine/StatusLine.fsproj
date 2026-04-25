@@ -9,7 +9,8 @@
   <ItemGroup>
     <Compile Include="Utils/DateTime.fs" />
     <Compile Include="Utils/WorkingDirectory.fs" />
-    <Compile Include="Types.fs" />
+    <Compile Include="Types/Context.fs" />
+    <Compile Include="Types/App.fs" />
     <Compile Include="Color.fs" />
     <Compile Include="Segments/Cwd.fs" />
     <Compile Include="Segments/ModelName.fs" />

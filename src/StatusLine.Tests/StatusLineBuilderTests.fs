@@ -3,7 +3,8 @@ module StatusLine.Tests.StatusLineBuilderTests
 open Xunit
 open FsUnit.Xunit
 open FsUnit.CustomMatchers
-open StatusLine.Types
+open StatusLine.Types.Context
+open StatusLine.Types.App
 open StatusLine.StatusLineBuilder
 
 let private unwrapOk result =

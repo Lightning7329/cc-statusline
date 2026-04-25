@@ -2,7 +2,7 @@ module StatusLine.Tests.Segments.ModelNameTests
 
 open Xunit
 open FsUnit.Xunit
-open StatusLine.Types
+open StatusLine.Types.Context
 open StatusLine.Segments.ModelName
 
 [<Fact>]
