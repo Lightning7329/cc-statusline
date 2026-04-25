@@ -1,0 +1,22 @@
+{
+  "env": {
+    "WORKSPACE_ROOT": "/workspaces/cc-statusline"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/format-fs.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "/workspaces/cc-statusline/src/StatusLine/bin/Release/net10.0/linux-arm64/statusline"
+  }
+}
