@@ -62,6 +62,10 @@ type Worktree = {
     OriginalBranch: string
 }
 
+type ContextDeserializeError =
+    | InvalidJson of message: string
+    | MissingOrInvalidField of message: string
+
 type Context = {
     Cwd: string
     SessionId: string
