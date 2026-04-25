@@ -28,7 +28,7 @@ dotnet publish -c Release -r osx-x64 --self-contained
 dotnet publish -c Release -r osx-arm64 --self-contained
 ```
 
-出力先: `src/StatusLine/bin/Release/net10.0/<RID>/publish/StatusLine`
+出力先: `src/StatusLine/bin/Release/net10.0/<RID>/publish/statusline`
 
 ## 開発
 
@@ -39,6 +39,25 @@ dotnet build
 # 実行
 dotnet run --project src/StatusLine
 
+# テスト
+dotnet test
+
 # コードフォーマット
 dotnet fantomas .
 ```
+
+## 動作確認
+
+tmp/sample.json にサンプルの JSON を配置して、以下のコマンドで動作確認できます。
+
+```bash
+# ビルドしてから実行
+cat tmp/sample.json | dotnet run --project src/StatusLine
+
+# 直接ビルド済みのシングルバイナリを実行
+cat tmp/sample.json | src/StatusLine/bin/Release/net10.0/linux-arm64/publish/statusline
+```
+
+## ライセンス
+
+[MIT License](LICENSE)
