@@ -23,7 +23,7 @@
 		}
 	},
 	"features": {
-		"ghcr.io/devcontainers-extra/features/claude-code:2": {},
+		"ghcr.io/anthropics/devcontainer-features/claude-code": {},
 		"ghcr.io/esimkowitz/devcontainer-features/claude-code-persistence:1": {
 			"persistClaudeDir": true,
 			"persistClaudeJson": true
