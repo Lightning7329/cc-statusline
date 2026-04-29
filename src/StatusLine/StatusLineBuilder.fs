@@ -45,13 +45,16 @@ let build (c: Context) =
     let modelText = ModelName.format c.Model |> Some
     let costText = CostDisplay.format c.Cost |> applyColor |> Some
 
+    let contextUsage =
+        ContextWindowUsage.format c.ContextWindow |> Option.map applyColor
+
     let fiveHourEntry = c.RateLimits |> Option.bind _.FiveHour
     let sevenDayEntry = c.RateLimits |> Option.bind _.SevenDay
 
     let fiveText = RateLimit.formatFiveHour fiveHourEntry |> Option.map applyColor
     let sevenText = RateLimit.formatSevenDay sevenDayEntry |> Option.map applyColor
 
-    [ cwdText; modelText; costText; fiveText; sevenText ]
+    [ cwdText; modelText; costText; contextUsage; fiveText; sevenText ]
     |> List.choose id
     |> String.concat " | "
 
