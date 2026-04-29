@@ -30,6 +30,17 @@ dotnet publish -c Release -r osx-arm64 --self-contained
 
 出力先: `src/StatusLine/bin/Release/net10.0/<RID>/publish/statusline`
 
+### バイナリサイズの最適化
+
+プロジェクトファイルで以下の設定を有効にしており、自己完結型バイナリのサイズを削減しています。
+
+| 設定 | 効果 |
+|------|------|
+| `InvariantGlobalization` | ICU（国際化）データを除外（約30MB減） |
+| `EnableCompressionInSingleFile` | SingleFile内のILアセンブリをgzip圧縮（約10MB減） |
+| `DebugType=none` | デバッグシンボルを除外 |
+| `StripSymbols` | ネイティブシンボルをストリップ |
+
 ## 開発
 
 ```bash
