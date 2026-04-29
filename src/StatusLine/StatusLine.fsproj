@@ -7,6 +7,7 @@
     <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Utils/OptionBuilder.fs" />
     <Compile Include="Utils/DateTime.fs" />
     <Compile Include="Utils/WorkingDirectory.fs" />
     <Compile Include="Types/Context.fs" />
