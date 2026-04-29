@@ -20,15 +20,14 @@ let formatBar usedPercentage =
         + brailles[partialIndex]
         + (brailles[0] |> String.replicate (10 - 1 - fullCount))
 
-let format (contextWindow: ContextWindow) : Segment option =
-    option {
-        let! usage = contextWindow.UsedPercentage
-        let percentage = sprintf "%d%%" usage
-        let bar = formatBar usage
-        let color = StatusLine.Color.percentageToColor (float usage)
+let format (contextWindow: ContextWindow) : Segment option = option {
+    let! usage = contextWindow.UsedPercentage
+    let percentage = sprintf "%d%%" usage
+    let bar = formatBar usage
+    let color = StatusLine.Color.percentageToColor (float usage)
 
-        return {
-            Text = sprintf "%s %s" bar percentage
-            Color = Some color
-        }
+    return {
+        Text = sprintf "%s %s" bar percentage
+        Color = Some color
     }
+}
