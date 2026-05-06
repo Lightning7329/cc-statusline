@@ -13,8 +13,6 @@ let formatEntry (dateFormat: string) (entry: RateLimitEntry) : Segment =
     let color = StatusLine.Color.percentageToColor entry.UsedPercentage
     { Text = text; Color = Some color }
 
-let formatFiveHour (entry: RateLimitEntry option) : Segment option =
-    entry |> Option.map (formatEntry "HH:mm")
+let formatFiveHour (entry: RateLimitEntry) : Segment = entry |> formatEntry "HH:mm"
 
-let formatSevenDay (entry: RateLimitEntry option) : Segment option =
-    entry |> Option.map (formatEntry "MM/dd HH:mm")
+let formatSevenDay (entry: RateLimitEntry) : Segment = entry |> formatEntry "MM/dd HH:mm"

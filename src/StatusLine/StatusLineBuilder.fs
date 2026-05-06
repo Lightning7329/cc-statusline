@@ -4,10 +4,11 @@ open System.Drawing
 open System.Text.Json
 open System.Text.Json.Serialization
 open Pastel
-open StatusLine.Types.Context
-open StatusLine.Types.App
-open StatusLine.Segments
 open StatusLine.ColoredOutput
+open StatusLine.Segments
+open StatusLine.Types.App
+open StatusLine.Types.Context
+open StatusLine.Utils.OptionBuilder
 
 let private jsonOptions =
     let opts =
@@ -45,16 +46,24 @@ let build (c: Context) =
     let modelText = ModelName.format c.Model |> Some
     let costText = CostDisplay.format c.Cost |> applyColor |> Some
 
-    let contextUsage =
-        ContextWindowUsage.format c.ContextWindow |> Option.map applyColor
+    let contextUsage = option {
+        let! bar = ContextWindowUsage.format c.ContextWindow |> Option.map applyColor
+        return sprintf "ctx %s" bar
+    }
 
-    let fiveHourEntry = c.RateLimits |> Option.bind _.FiveHour
-    let sevenDayEntry = c.RateLimits |> Option.bind _.SevenDay
+    let fiveHourText = option {
+        let! rateLimitEntry = c.RateLimits |> Option.bind _.FiveHour
+        let fiveText = rateLimitEntry |> RateLimit.formatFiveHour |> applyColor
+        return sprintf "5h %s" fiveText
+    }
 
-    let fiveText = RateLimit.formatFiveHour fiveHourEntry |> Option.map applyColor
-    let sevenText = RateLimit.formatSevenDay sevenDayEntry |> Option.map applyColor
+    let sevenDayText = option {
+        let! rateLimitEntry = c.RateLimits |> Option.bind _.SevenDay
+        let sevenText = rateLimitEntry |> RateLimit.formatSevenDay |> applyColor
+        return sprintf "7d %s" sevenText
+    }
 
-    [ cwdText; modelText; costText; contextUsage; fiveText; sevenText ]
+    [ cwdText; modelText; costText; contextUsage; fiveHourText; sevenDayText ]
     |> List.choose id
     |> String.concat " | "
 
