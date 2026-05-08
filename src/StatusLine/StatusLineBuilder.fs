@@ -41,6 +41,13 @@ let tryParseInput (input: string) =
             Error(InvalidJson ex.Message)
     | ex -> Error(InvalidJson ex.Message)
 
+let private concatRow (segments: string option list) =
+    let parts = segments |> List.choose id
+
+    match parts with
+    | [] -> None
+    | _ -> parts |> String.concat " | " |> Some
+
 let build (c: Context) =
     let cwdText = Cwd.format c.Cwd |> Some
     let modelText = ModelName.format c.Model |> Some
@@ -63,9 +70,12 @@ let build (c: Context) =
         return sprintf "7d %s" sevenText
     }
 
-    [ cwdText; modelText; costText; contextUsage; fiveHourText; sevenDayText ]
-    |> List.choose id
-    |> String.concat " | "
+    [
+        [ cwdText; modelText; costText; contextUsage ]
+        [ fiveHourText; sevenDayText ]
+    ]
+    |> List.choose concatRow
+    |> String.concat "\n"
 
 let buildFromInput input =
     match tryParseInput input with
