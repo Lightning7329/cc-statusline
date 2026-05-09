@@ -57,7 +57,9 @@ dotnet fantomas .
 
 ## Testing locally
 
-Place a sample JSON file at `tmp/sample.json`, then:
+Place a sample JSON file at `tmp/sample.json`. The full JSON schema is available at [Available data](https://code.claude.com/docs/en/statusline#available-data).
+
+Then:
 
 ```bash
 # Build and run

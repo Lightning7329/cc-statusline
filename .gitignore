@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Local dev/test data
+tmp/
+
 # User-specific files
 *.rsuser
 *.suo
