@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/github/license/Lightning7329/cc-statusline)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Lightning7329/cc-statusline)](https://github.com/Lightning7329/cc-statusline/releases/latest)
-[![CI](https://github.com/Lightning7329/cc-statusline/actions/workflows/release.yml/badge.svg)](https://github.com/Lightning7329/cc-statusline/actions/workflows/release.yml)
+[![CI](https://github.com/Lightning7329/cc-statusline/workflows/Release/badge.svg)](https://github.com/Lightning7329/cc-statusline/actions/workflows/release.yml)
 
 A custom status line for [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview). Built with F# and distributed as a self-contained single binary.
 
