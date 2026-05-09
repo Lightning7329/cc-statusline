@@ -18,6 +18,7 @@
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
 				"Ionide.Ionide-fsharp",
+				"github.vscode-github-actions",
 				"ms-dotnettools.csharp"
 			]
 		}
