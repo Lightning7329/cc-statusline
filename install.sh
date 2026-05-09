@@ -116,12 +116,3 @@ else
     printf "\nNote: python3 not found. Add this to %s manually:\n" "$SETTINGS_FILE"
     printf '  "statusLine": { "type": "command", "command": "%s" }\n' "${INSTALL_DIR}/${BINARY_NAME}"
 fi
-
-case ":${PATH}:" in
-    *":${INSTALL_DIR}:"*) ;;
-    *)
-        printf "\nNote: %s is not in your PATH.\n" "$INSTALL_DIR"
-        printf "Add it by appending this to your shell profile:\n"
-        printf "  export PATH=\"%s:\$PATH\"\n" "$INSTALL_DIR"
-        ;;
-esac
