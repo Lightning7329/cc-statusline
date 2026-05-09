@@ -42,8 +42,30 @@ jobs:
             console.log(`allSuccess: ${allSuccess}`);
             core.setOutput('all_success', allSuccess);
 
+      - name: Check for workflow file changes
+        uses: actions/github-script@v9
+        id: files
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            const files = await github.rest.pulls.listFiles({
+              owner,
+              repo,
+              pull_number: context.payload.pull_request.number,
+            });
+
+            const hasWorkflowChanges = files.data.some(
+              (f) => f.filename.startsWith('.github/workflows/')
+            );
+
+            console.log(`hasWorkflowChanges: ${hasWorkflowChanges}`);
+            core.setOutput('has_workflow_changes', hasWorkflowChanges);
+
+      # GITHUB_TOKEN cannot merge PRs that modify .github/workflows/ files
+      # because the `workflows` permission is only available to PATs.
       - name: Merge PR (squash)
-        if: steps.check.outputs.all_success == 'true'
+        if: steps.check.outputs.all_success == 'true' && steps.files.outputs.has_workflow_changes != 'true'
         uses: actions/github-script@v9
         with:
           script: |
