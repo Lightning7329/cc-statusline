@@ -1,74 +1,78 @@
 # cc-statusline
 
-Claude Code のステータスライン用スクリプト。F# で実装し、各プラットフォーム向けのシングルバイナリとして配布します。
+A custom status line for [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview). Built with F# and distributed as a self-contained single binary.
 
-## ビルド
+Displays context window usage, model name, session cost, rate limit status, and more — with color-coded indicators that shift from green to red as resources are consumed.
 
-### Linux x64
-
-```bash
-dotnet publish -c Release -r linux-x64 --self-contained
-```
-
-### Linux ARM64
+## Install
 
 ```bash
-dotnet publish -c Release -r linux-arm64 --self-contained
+curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/install.sh | sh
 ```
 
-### macOS Intel (x64)
+This will:
+1. Download the latest binary for your platform (Linux/macOS, x64/ARM64)
+2. Install it to `~/.claude/bin/`
+3. Configure Claude Code's `settings.json` automatically
+
+### Options
 
 ```bash
-dotnet publish -c Release -r osx-x64 --self-contained
+# Install a specific version
+curl -fsSL ... | sh -s -- --version v0.0.1
+
+# Install to a custom directory
+curl -fsSL ... | sh -s -- --dir /usr/local/bin
+
+# Configure a specific settings scope (user, project, or local)
+curl -fsSL ... | sh -s -- --scope project
 ```
 
-### macOS Apple Silicon (ARM64)
+### Manual setup
 
-```bash
-dotnet publish -c Release -r osx-arm64 --self-contained
-```
+1. Download and extract the binary:
+   ```bash
+   # Using curl (replace OS and ARCH as needed: linux/osx, x64/arm64)
+   curl -fsSL https://github.com/Lightning7329/cc-statusline/releases/latest/download/statusline-linux-x64.tar.gz | tar -xz
 
-出力先: `src/StatusLine/bin/Release/net10.0/<RID>/publish/statusline`
+   # Or using gh CLI
+   gh release download --repo Lightning7329/cc-statusline --pattern 'statusline-linux-x64.tar.gz' && tar -xzf statusline-linux-x64.tar.gz
+   ```
+2. Place it in your PATH:
+   ```bash
+   mkdir -p ~/.claude/bin
+   mv statusline ~/.claude/bin/
+   chmod +x ~/.claude/bin/statusline
+   ```
+3. Add the following to your Claude Code `settings.json`:
+   ```json
+   {
+     "statusLine": {
+       "type": "command",
+       "command": "~/.claude/bin/statusline"
+     }
+   }
+   ```
 
-### バイナリサイズの最適化
+## Segments
 
-プロジェクトファイルで以下の設定を有効にしており、自己完結型バイナリのサイズを削減しています。
+| Segment           | Description                                               |
+| ----------------- | --------------------------------------------------------- |
+| Working directory | Current directory, shortened with `~`                     |
+| Model name        | Active Claude model (e.g. `opus`, `sonnet`)               |
+| Cost              | Session cost in USD                                       |
+| Context window    | Braille progress bar with usage percentage                |
+| Rate limit        | Remaining requests for context, 5-hour, and 7-day windows |
 
-| 設定 | 効果 |
-|------|------|
-| `InvariantGlobalization` | ICU（国際化）データを除外（約30MB減） |
-| `EnableCompressionInSingleFile` | SingleFile内のILアセンブリをgzip圧縮（約10MB減） |
-| `DebugType=none` | デバッグシンボルを除外 |
-| `StripSymbols` | ネイティブシンボルをストリップ |
+## Requirements
 
-## 開発
+- Linux (x64, ARM64) or macOS (Intel, Apple Silicon)
+- Claude Code with status line support
 
-```bash
-# 通常ビルド
-dotnet build
+## Development
 
-# 実行
-dotnet run --project src/StatusLine
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for build instructions and local testing.
 
-# テスト
-dotnet test
-
-# コードフォーマット
-dotnet fantomas .
-```
-
-## 動作確認
-
-tmp/sample.json にサンプルの JSON を配置して、以下のコマンドで動作確認できます。
-
-```bash
-# ビルドしてから実行
-cat tmp/sample.json | dotnet run --project src/StatusLine
-
-# 直接ビルド済みのシングルバイナリを実行
-cat tmp/sample.json | src/StatusLine/bin/Release/net10.0/linux-arm64/publish/statusline
-```
-
-## ライセンス
+## License
 
 [MIT License](LICENSE)

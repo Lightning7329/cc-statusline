@@ -2,67 +2,65 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## コマンド
+## Commands
 
 ```bash
-# ビルド
+# Build
 dotnet build
-dotnet build --configuration Release
 
-# テスト
+# Test (all)
 dotnet test
-dotnet test --filter "テスト名の一部"
 
-# 実行（stdin から JSON を受け取る）
-cat sample.json | dotnet run --project src/StatusLine
+# Test (single / filtered)
+dotnet test --filter "full/partial name of test"
 
-# 自己完結型バイナリとして発行
+# Run (reads JSON from stdin)
+cat tmp/sample.json | dotnet run --project src/StatusLine
+
+# Publish as self-contained binary
 dotnet publish -c Release -r linux-x64 --self-contained
 
-# コードフォーマット（Fantomas）
+# Code formatting (Fantomas)
 dotnet fantomas .
 ```
 
-## アーキテクチャ
+## Architecture
 
-.NET 10 をターゲットとした F# コンソールアプリケーション。Claude Code のステータスライン表示を担う。stdin から JSON（Context）を受け取り、ANSIカラー付きのステータスライン文字列を stdout に出力する。
+F# console application targeting .NET 10. Reads a JSON `Context` from stdin, outputs ANSI-colored status line text to stdout. Entry point: `src/StatusLine/Program.fs` (supports `--version` flag).
 
-エントリーポイントは `src/StatusLine/Program.fs`（1行）。
-
-### データフロー
+### Data flow
 
 ```
 stdin JSON → tryParseInput (Result<Context, ContextDeserializeError>)
-           → build (各セグメントをフォーマット・色付け)
-           → " | " で結合して stdout へ
+           → build (format each segment with color)
+           → rows joined by "\n", segments within a row joined by " | "
+           → stdout
 ```
 
-### レイヤー設計
+### Two-layer output design
 
-出力ロジックを以下の2層に分離する：
+1. **Text computation layer** (tested): Segment formatters return `Segment` records containing plain text and a `System.Drawing.Color` value. No dependency on Pastel.
+2. **Color application layer** (not tested): `ColoredOutput.applyColor` wraps text with ANSI escape codes via Pastel.
 
-1. **テキスト計算層**（テスト対象）: 表示するテキストの内容や、パーセンテージに応じた色（`System.Drawing.Color`）を計算する純粋なロジック。Pastel に依存しない。
-2. **色付加層**（テスト対象外）: `ColoredOutput.applyColor` が Pastel を使い、計算済みの色をテキストに適用して ANSI エスケープコード付き文字列を生成する。
+This separation means the test project does not need a Pastel reference.
 
-この設計により、テストプロジェクトへの Pastel 追加は不要。
+### Module compilation order (as in .fsproj)
 
-### モジュール構成
+`Utils/` (OptionBuilder, DateTime, WorkingDirectory) → `Types/` (Context, App) → `Color` → `Segments/` (ContextWindowUsage, Cwd, ModelName, CostDisplay, RateLimit) → `ColoredOutput` → `StatusLineBuilder` → `Program`
 
-- **Types.fs** — 全レコード型・判別共用体（`Context`, `Segment`, `ContextDeserializeError` 等）
-- **Color.fs** — `percentageToColor: float → Color`（0%=緑 → 100%=赤のグラデーション、OKLCH 色空間で補間。Wacton.Unicolour 使用）
-- **Segments/** — 各セグメントの純粋なフォーマッタ（`Cwd`, `ModelName`, `CostDisplay`, `RateLimit`）
-- **Utils/** — ヘルパー（`DateTime`：JST変換、`WorkingDirectory`：パス正規化）
-- **StatusLineBuilder.fs** — JSON パース（`tryParseInput`）とセグメント組み立て（`build`）のオーケストレーション
+### JSON deserialization
 
-### JSON デシリアライズ
+FSharp.SystemTextJson with `JsonNamingPolicy.SnakeCaseLower` for automatic snake_case ↔ PascalCase conversion. Option fields: JSON absence and `null` both map to `None` (`SkippableOptionFields.Always` with `deserializeNullAsNone = true`). Parse failures return `Result` with `ContextDeserializeError` (`InvalidJson` | `MissingOrInvalidField`).
 
-FSharp.SystemTextJson を使用。snake_case ↔ PascalCase の自動変換。`option` 型フィールドは JSON の不在・null いずれも `None` にマッピング（`SkippableOptionFields.Always`）。パース失敗は `Result` 型の `ContextDeserializeError`（`InvalidJson` / `MissingOrInvalidField`）で返す。
+### Color gradient
 
-## コードスタイル
+`Color.percentageToColor: float → Color` interpolates from green (0%) to red (100%) in OKLCH color space using Wacton.Unicolour.
 
-- F# のフォーマットには Fantomas 7.0.0 を使用 (`dotnet fantomas .`)
-- ブラケットスタイル: Stroustrup（開き括弧を同じ行に）、最大空行数 2（`.editorconfig` で強制）
+## Code style
 
-## テスト
+- Format F# with Fantomas 7.0.0 (`dotnet fantomas .`)
+- Bracket style: Stroustrup; max 2 consecutive blank lines (`.editorconfig`)
 
-XUnit + FsUnit.Xunit。DU ケースのアサーションには `FsUnit.CustomMatchers.ofCase` を使用。テスト名は日本語。
+## Testing
+
+XUnit + FsUnit.Xunit. Test names are in Japanese. Use `FsUnit.CustomMatchers.ofCase` for discriminated union case assertions.
