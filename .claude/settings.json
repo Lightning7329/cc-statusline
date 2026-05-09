@@ -1,7 +1,4 @@
 {
-  "env": {
-    "WORKSPACE_ROOT": "/workspaces/cc-statusline"
-  },
   "hooks": {
     "PostToolUse": [
       {
@@ -14,9 +11,5 @@
         ]
       }
     ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "/workspaces/cc-statusline/src/StatusLine/bin/Release/net10.0/linux-arm64/statusline"
   }
 }
