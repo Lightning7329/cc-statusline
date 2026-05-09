@@ -98,13 +98,13 @@ import json, sys
 path = sys.argv[1]
 with open(path) as f:
     data = json.load(f)
-data['statusLine'] = {'type': 'command', 'command': '~/.claude/bin/statusline'}
+data['statusLine'] = {'type': 'command', 'command': sys.argv[2]}
 with open(path, 'w') as f:
     json.dump(data, f, indent=2)
     f.write('\n')
-" "$SETTINGS_FILE"
+" "$SETTINGS_FILE" "${INSTALL_DIR}/${BINARY_NAME}"
     else
-        printf '{\n  "statusLine": {\n    "type": "command",\n    "command": "~/.claude/bin/statusline"\n  }\n}\n' > "$SETTINGS_FILE"
+        printf '{\n  "statusLine": {\n    "type": "command",\n    "command": "%s"\n  }\n}\n' "${INSTALL_DIR}/${BINARY_NAME}" > "$SETTINGS_FILE"
     fi
 
     printf "Configured statusLine in %s\n" "$SETTINGS_FILE"
@@ -114,7 +114,7 @@ if command -v python3 >/dev/null 2>&1; then
     configure_settings
 else
     printf "\nNote: python3 not found. Add this to %s manually:\n" "$SETTINGS_FILE"
-    printf '  "statusLine": { "type": "command", "command": "~/.claude/bin/statusline" }\n'
+    printf '  "statusLine": { "type": "command", "command": "%s" }\n' "${INSTALL_DIR}/${BINARY_NAME}"
 fi
 
 case ":${PATH}:" in
