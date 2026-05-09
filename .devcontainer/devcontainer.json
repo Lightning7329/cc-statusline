@@ -39,7 +39,8 @@
 			"username": "vscode",
 			"userUid": "automatic",
 			"userGid": "automatic"
-		}
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
