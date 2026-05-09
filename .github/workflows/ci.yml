@@ -1,9 +1,18 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "StatusLine.slnx"
   pull_request:
     branches:
       - main
+    paths:
+      - "src/**"
+      - "StatusLine.slnx"
 
 jobs:
   test:
