@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-REPO="OWNER/REPO"
+REPO="Lightning7329/cc-statusline"
 BINARY_NAME="statusline"
 DEFAULT_INSTALL_DIR="${HOME}/.claude/bin"
 
