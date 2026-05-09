@@ -1,8 +1,14 @@
 # cc-statusline
 
+[![License: MIT](https://img.shields.io/github/license/Lightning7329/cc-statusline)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/Lightning7329/cc-statusline)](https://github.com/Lightning7329/cc-statusline/releases/latest)
+[![CI](https://github.com/Lightning7329/cc-statusline/actions/workflows/release.yml/badge.svg)](https://github.com/Lightning7329/cc-statusline/actions/workflows/release.yml)
+
 A custom status line for [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview). Built with F# and distributed as a self-contained single binary.
 
 Displays context window usage, model name, session cost, rate limit status, and more — with color-coded indicators that shift from green to red as resources are consumed.
+
+![cc-statusline example](img/example.png)
 
 ## Install
 
@@ -19,13 +25,13 @@ This will:
 
 ```bash
 # Install a specific version
-curl -fsSL ... | sh -s -- --version v0.0.1
+curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/install.sh | sh -s -- --version v0.0.1
 
 # Install to a custom directory
-curl -fsSL ... | sh -s -- --dir /usr/local/bin
+curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/install.sh | sh -s -- --dir /usr/local/bin
 
 # Configure a specific settings scope (user, project, or local)
-curl -fsSL ... | sh -s -- --scope project
+curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/install.sh | sh -s -- --scope project
 ```
 
 ### Manual setup
