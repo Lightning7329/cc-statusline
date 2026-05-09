@@ -1,0 +1,58 @@
+name: Auto merge Dependabot PR
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  automerge:
+    if: github.event.review.state == 'approved' && github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      checks: read
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Check status checks
+        uses: actions/github-script@v9
+        id: check
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            const checks = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref: context.payload.pull_request.head.sha,
+            });
+
+            for (const check of checks.data.check_runs) {
+              console.log(`Check: ${check.name} | Status: ${check.status} | Conclusion: ${check.conclusion}`);
+            }
+
+            const otherChecks = checks.data.check_runs.filter(
+              (check) => check.name !== 'automerge'
+            );
+
+            const allSuccess = otherChecks.every(
+              (check) => check.conclusion === 'success'
+            );
+
+            console.log(`allSuccess: ${allSuccess}`);
+            core.setOutput('all_success', allSuccess);
+
+      - name: Merge PR (squash)
+        if: steps.check.outputs.all_success == 'true'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+
+            await github.rest.pulls.merge({
+              owner,
+              repo,
+              pull_number: pr.number,
+              merge_method: 'squash',
+            });
