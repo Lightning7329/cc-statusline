@@ -3,7 +3,8 @@ module StatusLine.Segments.GitBranch
 open StatusLine.Utils.Process
 
 let formatBranch (branch: string) : string =
-    if branch = "HEAD" then "detached" else branch
+    let name = if branch = "HEAD" then "detached" else branch
+    sprintf " %s" name
 
 let formatWithRunner (runner: string -> string option) (cwd: string) : string option =
     runner cwd |> Option.map formatBranch
