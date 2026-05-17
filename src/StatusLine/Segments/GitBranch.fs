@@ -4,15 +4,13 @@ open StatusLine.Utils.Process
 
 let private icon = char 0xE0A0 |> string
 
-let formatBranch (branch: string) : string =
-    let name = if branch = "HEAD" then "detached" else branch
-    $"{icon} {name}"
+let formatBranch (branch: string) : string = $"{icon} {branch}"
 
 let formatWithRunner (runner: string -> string option) (cwd: string) : string option =
     runner cwd |> Option.map formatBranch
 
-let format (cwd: string) : string option =
-    let runner dir =
-        tryRun dir "git" "rev-parse --abbrev-ref HEAD"
+let private getBranch (cwd: string) : string option =
+    tryRun cwd "git" "--no-optional-locks symbolic-ref --short HEAD"
+    |> Option.orElseWith (fun () -> tryRun cwd "git" "--no-optional-locks rev-parse --short HEAD")
 
-    formatWithRunner runner cwd
+let format (cwd: string) : string option = formatWithRunner getBranch cwd

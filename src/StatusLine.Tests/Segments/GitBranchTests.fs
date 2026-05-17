@@ -7,20 +7,20 @@ open StatusLine.Segments.GitBranch
 let private icon = char 0xE0A0 |> string
 
 [<Fact>]
-let ``通常のブランチ名をそのまま返す`` () =
+let ``通常のブランチ名をフォーマットする`` () =
     formatBranch "main" |> should equal $"{icon} main"
 
 [<Fact>]
-let ``スラッシュ付きブランチ名をそのまま返す`` () =
+let ``スラッシュ付きブランチ名をフォーマットする`` () =
     formatBranch "feature/add-git-segment"
     |> should equal $"{icon} feature/add-git-segment"
 
 [<Fact>]
-let ``HEADのときdetachedを返す`` () =
-    formatBranch "HEAD" |> should equal $"{icon} detached"
+let ``短縮コミットハッシュをフォーマットする`` () =
+    formatBranch "a1b2c3d" |> should equal $"{icon} a1b2c3d"
 
 [<Fact>]
-let ``formatWithRunnerがSomeのときブランチ名をフォーマットする`` () =
+let ``formatWithRunnerがSomeのときフォーマットする`` () =
     let runner _ = Some "main"
     formatWithRunner runner "/some/dir" |> should equal (Some $"{icon} main")
 
@@ -28,8 +28,3 @@ let ``formatWithRunnerがSomeのときブランチ名をフォーマットする
 let ``formatWithRunnerがNoneのときNoneを返す`` () =
     let runner _ = None
     formatWithRunner runner "/some/dir" |> should equal None
-
-[<Fact>]
-let ``formatWithRunnerがHEADを返すときdetachedにフォーマットする`` () =
-    let runner _ = Some "HEAD"
-    formatWithRunner runner "/some/dir" |> should equal (Some $"{icon} detached")
