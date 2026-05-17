@@ -15,11 +15,13 @@
     <Compile Include="Utils/OptionBuilder.fs" />
     <Compile Include="Utils/DateTime.fs" />
     <Compile Include="Utils/WorkingDirectory.fs" />
+    <Compile Include="Utils/Process.fs" />
     <Compile Include="Types/Context.fs" />
     <Compile Include="Types/App.fs" />
     <Compile Include="Color.fs" />
     <Compile Include="Segments/ContextWindowUsage.fs" />
     <Compile Include="Segments/Cwd.fs" />
+    <Compile Include="Segments/GitBranch.fs" />
     <Compile Include="Segments/ModelName.fs" />
     <Compile Include="Segments/CostDisplay.fs" />
     <Compile Include="Segments/RateLimit.fs" />

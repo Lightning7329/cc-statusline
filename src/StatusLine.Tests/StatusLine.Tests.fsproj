@@ -9,6 +9,7 @@
     <Compile Include="StatusLineBuilderTests.fs" />
     <Compile Include="Segments/ContextWindowUsageTests.fs" />
     <Compile Include="Segments/CwdTests.fs" />
+    <Compile Include="Segments/GitBranchTests.fs" />
     <Compile Include="Segments/ModelNameTests.fs" />
     <Compile Include="Segments/CostDisplayTests.fs" />
     <Compile Include="Segments/RateLimitTests.fs" />
