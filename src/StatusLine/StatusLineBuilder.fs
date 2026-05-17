@@ -50,6 +50,7 @@ let private concatRow (segments: string option list) =
 
 let build (c: Context) =
     let cwdText = Cwd.format c.Cwd |> Some
+    let branchText = GitBranch.format c.Cwd
     let modelText = ModelName.format c.Model |> Some
     let costText = CostDisplay.format c.Cost |> applyColor |> Some
 
@@ -71,7 +72,7 @@ let build (c: Context) =
     }
 
     [
-        [ cwdText; modelText; costText; contextUsage ]
+        [ cwdText; branchText; modelText; costText; contextUsage ]
         [ fiveHourText; sevenDayText ]
     ]
     |> List.choose concatRow
