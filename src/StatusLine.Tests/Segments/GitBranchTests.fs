@@ -4,7 +4,7 @@ open Xunit
 open FsUnit.Xunit
 open StatusLine.Segments.GitBranch
 
-let private icon = ""
+let private icon = char 0xE0A0 |> string
 
 [<Fact>]
 let ``通常のブランチ名をそのまま返す`` () =
