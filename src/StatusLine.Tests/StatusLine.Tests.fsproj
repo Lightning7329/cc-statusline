@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Utils/WorkingDirectoryTests.fs" />
+    <Compile Include="Utils/ProcessTests.fs" />
     <Compile Include="ColorTests.fs" />
     <Compile Include="StatusLineBuilderTests.fs" />
     <Compile Include="Segments/ContextWindowUsageTests.fs" />
