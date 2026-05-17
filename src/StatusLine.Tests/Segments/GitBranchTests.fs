@@ -29,7 +29,7 @@ module Format =
     let ``detached HEAD時に短縮コミットハッシュを返す`` () =
         withTempDir (fun dir git ->
             git "init -b main"
-            git "commit --allow-empty -m init"
+            git "-c user.name=test -c user.email=test@test commit --allow-empty -m init"
             let hash = tryRun dir "git" "rev-parse --short HEAD" |> Option.get
             git "checkout --detach"
             format dir |> should equal (Some $"{icon} {hash}"))
