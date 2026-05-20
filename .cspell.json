@@ -6,9 +6,13 @@
         "Colour",
         "dotnettools",
         "fantomas",
+        "globaltool",
         "Ionide",
         "Oklch",
+        "reportgenerator",
+        "reporttypes",
         "statusline",
+        "targetdir",
         "Unicolour",
         "Wacton",
         "Worktree"
