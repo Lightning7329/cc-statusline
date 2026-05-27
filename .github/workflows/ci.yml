@@ -7,12 +7,18 @@ on:
     paths:
       - "src/**"
       - "StatusLine.slnx"
+      - ".github/workflows/ci.yml"
   pull_request:
     branches:
       - main
     paths:
       - "src/**"
       - "StatusLine.slnx"
+      - ".github/workflows/ci.yml"
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   test:
@@ -22,4 +28,30 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "10.0.x"
-      - run: dotnet test
+
+      - name: Run tests with coverage
+        run: dotnet test --collect:"XPlat Code Coverage" -p:DebugType=portable --results-directory ./TestResults
+
+      - name: Generate coverage report
+        uses: danielpalme/ReportGenerator-GitHub-Action@5
+        with:
+          reports: ./TestResults/**/coverage.cobertura.xml
+          targetdir: coverage-report
+          reporttypes: Html;MarkdownSummaryGithub
+
+      - name: Add coverage to job summary
+        run: cat coverage-report/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-report
+          retention-days: 30
+
+      - name: Add coverage PR comment
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: coverage
+          path: coverage-report/SummaryGithub.md
