@@ -74,7 +74,7 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 ## Requirements
 
 - Linux (x64, ARM64) or macOS (Intel, Apple Silicon)
-- Claude Code with status line support
+- Claude Code **v2.1.119 or later** (see [CHANGELOG.md](CHANGELOG.md) for details)
 
 ## Development
 
