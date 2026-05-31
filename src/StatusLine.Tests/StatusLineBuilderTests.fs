@@ -26,7 +26,8 @@ let private fullJson =
   "workspace": {
     "current_dir": "/current/working/directory",
     "project_dir": "/original/project/directory",
-    "added_dirs": []
+    "added_dirs": [],
+    "repo": { "host": "github.com", "owner": "anthropics", "name": "claude-code" }
   },
   "version": "2.1.90",
   "output_style": { "name": "default" },
@@ -51,12 +52,19 @@ let private fullJson =
     }
   },
   "exceeds_200k_tokens": false,
+  "effort": { "level": "high" },
+  "thinking": { "enabled": true },
   "rate_limits": {
     "five_hour": { "used_percentage": 23.5, "resets_at": 1738425600 },
     "seven_day": { "used_percentage": 41.2, "resets_at": 1738857600 }
   },
   "vim": { "mode": "NORMAL" },
   "agent": { "name": "security-reviewer" },
+  "pr": {
+    "number": 1234,
+    "url": "https://github.com/anthropics/claude-code/pull/1234",
+    "review_state": "pending"
+  },
   "worktree": {
     "name": "my-feature",
     "path": "/path/to/.claude/worktrees/my-feature",
