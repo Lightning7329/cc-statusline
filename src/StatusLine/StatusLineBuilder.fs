@@ -51,7 +51,7 @@ let private concatRow (segments: string option list) =
 let build (c: Context) =
     let cwdText = Cwd.format c.Cwd |> Some
     let branchText = GitBranch.format c.Cwd
-    let modelText = ModelName.format c.Model |> Some
+    let modelText = ModelName.format c.Model c.Effort |> Some
     let costText = CostDisplay.format c.Cost |> applyColor |> Some
 
     let contextUsage = option {
