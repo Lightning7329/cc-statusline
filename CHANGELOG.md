@@ -1,10 +1,10 @@
 # Changelog
 
-このファイルは [release-please](https://github.com/googleapis/release-please) により、
-[Conventional Commits](https://www.conventionalcommits.org/ja/) 形式のコミットメッセージから
-自動生成・更新されます。手動で編集しないでください。
+This file is generated and maintained by
+[release-please](https://github.com/googleapis/release-please) from
+[Conventional Commits](https://www.conventionalcommits.org/). Do not edit it by hand.
 
-新しいリリースのエントリは、リリースPRがマージされた際にこの見出しの下へ追記されます。
+New release entries are inserted below this preamble in reverse-chronological order.
 
 ## [0.1.1](https://github.com/Lightning7329/cc-statusline/releases/tag/v0.1.1)
 
