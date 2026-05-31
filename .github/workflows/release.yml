@@ -68,13 +68,12 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           merge-multiple: true
-      - name: Create GitHub Release
+      - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: >-
-          gh release create "$TAG"
+          gh release upload "$TAG"
           statusline-*.tar.gz
           --repo "$GITHUB_REPOSITORY"
-          --title "$TAG"
-          --generate-notes
+          --clobber
