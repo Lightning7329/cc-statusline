@@ -6,6 +6,18 @@ This file is generated and maintained by
 
 New release entries are inserted below this preamble in reverse-chronological order.
 
+## [0.2.0](https://github.com/Lightning7329/cc-statusline/compare/v0.1.1...v0.2.0) (2026-05-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* requires Claude Code v2.1.119 or later
+
+### Features
+
+* statusline スキーマ更新と effort level 表示の追加 ([#35](https://github.com/Lightning7329/cc-statusline/issues/35)) ([0b3d303](https://github.com/Lightning7329/cc-statusline/commit/0b3d3033898b08a08cddb8d5b600f619f8cd5474))
+* テスト実行からHTMLカバレッジレポート作成までをスクリプト&タスク化 ([0f98a89](https://github.com/Lightning7329/cc-statusline/commit/0f98a896e9ae069f960333ffbd72c85f5b254685))
+
 ## [0.1.1](https://github.com/Lightning7329/cc-statusline/releases/tag/v0.1.1)
 
 ## [0.1.0](https://github.com/Lightning7329/cc-statusline/releases/tag/v0.1.0)
