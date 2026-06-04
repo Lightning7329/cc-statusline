@@ -12,8 +12,85 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - uses: googleapis/release-please-action@v4
+        id: release
         with:
           config-file: .github/release-please/config.json
           manifest-file: .github/release-please/manifest.json
+
+  test:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+      - run: dotnet test
+
+  build:
+    needs: [release-please, test]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - rid: linux-x64
+            os: linux
+            arch: x64
+          - rid: linux-arm64
+            os: linux
+            arch: arm64
+          - rid: osx-x64
+            os: osx
+            arch: x64
+          - rid: osx-arm64
+            os: osx
+            arch: arm64
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+        env:
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+      - name: Publish
+        run: >-
+          dotnet publish src/StatusLine
+          -c Release
+          -r ${{ matrix.rid }}
+          --self-contained
+          -p:Version=${{ steps.version.outputs.version }}
+      - name: Package tarball
+        run: >-
+          tar -czf statusline-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+          -C src/StatusLine/bin/Release/net10.0/${{ matrix.rid }}/publish
+          statusline
+      - uses: actions/upload-artifact@v7
+        with:
+          name: statusline-${{ matrix.os }}-${{ matrix.arch }}
+          path: statusline-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+
+  release:
+    needs: [release-please, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          merge-multiple: true
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: >-
+          gh release upload "$TAG"
+          statusline-*.tar.gz
+          --repo "$GITHUB_REPOSITORY"
+          --clobber
