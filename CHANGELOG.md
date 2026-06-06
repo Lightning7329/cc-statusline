@@ -6,6 +6,13 @@ This file is generated and maintained by
 
 New release entries are inserted below this preamble in reverse-chronological order.
 
+## [0.2.1](https://github.com/Lightning7329/cc-statusline/compare/v0.2.0...v0.2.1) (2026-06-06)
+
+
+### Bug Fixes
+
+* release ワークフローを release-please に統合してトリガー不発を解消 ([#38](https://github.com/Lightning7329/cc-statusline/issues/38)) ([c6f4629](https://github.com/Lightning7329/cc-statusline/commit/c6f4629504681a57b96b926c611eb077505186a1)), closes [#37](https://github.com/Lightning7329/cc-statusline/issues/37)
+
 ## [0.2.0](https://github.com/Lightning7329/cc-statusline/compare/v0.1.1...v0.2.0) (2026-05-31)
 
 
