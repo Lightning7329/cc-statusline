@@ -80,6 +80,11 @@ let build (c: Context) =
 
 let buildFromInput input =
     match tryParseInput input with
-    | Ok ctx -> build ctx
+    | Ok ctx ->
+        try
+            build ctx
+        with ex ->
+            eprintfn "statusline error: %s" ex.Message
+            "statusline error: unexpected error".Pastel Color.Red
     | Error(InvalidJson _) -> "statusline error: invalid JSON".Pastel Color.Red
     | Error(MissingOrInvalidField _) -> "statusline error: missing or invalid field".Pastel Color.Red

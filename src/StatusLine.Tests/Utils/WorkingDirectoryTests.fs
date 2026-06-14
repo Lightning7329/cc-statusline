@@ -1,5 +1,6 @@
 module StatusLine.Tests.Utils.WorkingDirectoryTests
 
+open System
 open Xunit
 open FsUnit.Xunit
 open StatusLine.Utils.WorkingDirectory
@@ -35,3 +36,13 @@ let ``absolutePathが全く別ツリーの場合、相対表記で返す`` () =
 let ``WORKSPACE_ROOTの末尾にスラッシュがある場合でもディレクトリ名を正しく返す`` () =
     relativePath (setEnv "/workspaces/my-project/") "/workspaces/my-project/foo/bar"
     |> should equal "my-project/foo/bar"
+
+[<Fact>]
+let ``WORKSPACE_ROOTが空文字の場合、未設定扱いとしてabsolutePathをそのまま返す`` () =
+    let original = Environment.GetEnvironmentVariable "WORKSPACE_ROOT"
+
+    try
+        Environment.SetEnvironmentVariable("WORKSPACE_ROOT", "")
+        relativePathFromEnv "/some/absolute/path" |> should equal "/some/absolute/path"
+    finally
+        Environment.SetEnvironmentVariable("WORKSPACE_ROOT", original)
