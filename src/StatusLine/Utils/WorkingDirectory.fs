@@ -12,4 +12,7 @@ let relativePath (getEnv: string -> string option) absolutePath =
         if rel = "." then baseDirName else $"{baseDirName}/{rel}"
 
 let relativePathFromEnv =
-    relativePath (Environment.GetEnvironmentVariable >> Option.ofObj)
+    relativePath (fun key ->
+        Environment.GetEnvironmentVariable key
+        |> Option.ofObj
+        |> Option.filter (fun s -> s.Length > 0))
