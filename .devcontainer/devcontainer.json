@@ -40,7 +40,8 @@
 			"userUid": "automatic",
 			"userGid": "automatic"
 		},
-		"ghcr.io/devcontainers/features/github-cli:1": {}
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/lukewiwa/features/shellcheck:0": {}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
