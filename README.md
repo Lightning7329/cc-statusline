@@ -64,7 +64,7 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 
 | Segment           | Description                                                          |
 | ----------------- | -------------------------------------------------------------------- |
-| Working directory | Current directory, shortened with `~`                                |
+| Working directory | Current directory, shortened against project / added dirs / `$HOME`  |
 | Git branch        | Current branch name, or short commit hash when in detached HEAD      |
 | Model name        | Active Claude model (e.g. `opus`, `sonnet`)                          |
 | Cost              | Session cost in USD                                                  |

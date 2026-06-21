@@ -8,13 +8,13 @@ open StatusLine.Utils.Settings
 module Load =
 
     [<Fact>]
-    let ``getEnvのWORKSPACE_ROOTをWorkspaceRootにマップする`` () =
+    let ``getEnv の HOME を Home にマップする`` () =
         let getEnv =
             function
-            | "WORKSPACE_ROOT" -> Some "/workspaces/proj"
+            | "HOME" -> Some "/home/user"
             | _ -> None
 
-        (load getEnv).WorkspaceRoot |> should equal (Some "/workspaces/proj")
+        (load getEnv).Home |> should equal (Some "/home/user")
 
 module EnvReader =
 
