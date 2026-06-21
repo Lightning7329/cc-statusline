@@ -6,7 +6,7 @@ open StatusLine.Types.App
 let formatEntry (dateFormat: string) (entry: RateLimitEntry) : Segment =
     let resetTime =
         entry.ResetsAt
-        |> StatusLine.Utils.DateTime.UnixTimeToJstDateTimeOffset
+        |> StatusLine.Utils.DateTime.unixTimeToLocalDateTimeOffset
         |> _.ToString(dateFormat)
 
     let text = sprintf "%1.1f%% (reset at %s)" entry.UsedPercentage resetTime
