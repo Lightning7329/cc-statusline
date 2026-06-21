@@ -1,13 +1,17 @@
 module StatusLine.Tests.Segments.RateLimitTests
 
+open System
 open Xunit
 open FsUnit.Xunit
 open StatusLine.Types.Context
 open StatusLine.Types.App
 open StatusLine.Segments.RateLimit
 
-// 1738422000 = 2025-02-01 15:00:00 UTC = 2025-02-02 00:00:00 JST
+// 1738422000 = 2025-02-01 15:00:00 UTC
 let private testTimestamp = 1738422000L
+
+let private localTimeString (format: string) =
+    DateTimeOffset.FromUnixTimeSeconds(testTimestamp).ToLocalTime().ToString format
 
 [<Fact>]
 let ``0%のとき緑色を返す`` () =
@@ -41,7 +45,8 @@ let ``HH:mm形式でリセット時刻をフォーマットする`` () =
             ResetsAt = testTimestamp
         }
 
-    seg.Text |> should equal "50.0% (reset at 00:00)"
+    seg.Text
+    |> should equal (sprintf "50.0%% (reset at %s)" (localTimeString "HH:mm"))
 
 [<Fact>]
 let ``MM/dd HH:mm形式でリセット時刻をフォーマットする`` () =
@@ -51,7 +56,8 @@ let ``MM/dd HH:mm形式でリセット時刻をフォーマットする`` () =
             ResetsAt = testTimestamp
         }
 
-    seg.Text |> should equal "50.0% (reset at 02/02 00:00)"
+    seg.Text
+    |> should equal (sprintf "50.0%% (reset at %s)" (localTimeString "MM/dd HH:mm"))
 
 [<Fact>]
 let ``formatFiveHourはHH:mm形式を使う`` () =
@@ -61,7 +67,8 @@ let ``formatFiveHourはHH:mm形式を使う`` () =
             ResetsAt = testTimestamp
         }
 
-    seg.Text |> should equal "0.0% (reset at 00:00)"
+    seg.Text
+    |> should equal (sprintf "0.0%% (reset at %s)" (localTimeString "HH:mm"))
 
 [<Fact>]
 let ``formatSevenDayはMM/dd HH:mm形式を使う`` () =
@@ -71,4 +78,5 @@ let ``formatSevenDayはMM/dd HH:mm形式を使う`` () =
             ResetsAt = testTimestamp
         }
 
-    seg.Text |> should equal "0.0% (reset at 02/02 00:00)"
+    seg.Text
+    |> should equal (sprintf "0.0%% (reset at %s)" (localTimeString "MM/dd HH:mm"))
