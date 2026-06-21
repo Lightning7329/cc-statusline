@@ -8,6 +8,7 @@ open StatusLine.ColoredOutput
 open StatusLine.Segments
 open StatusLine.Types.App
 open StatusLine.Types.Context
+open StatusLine.Utils
 open StatusLine.Utils.OptionBuilder
 
 let private jsonOptions =
@@ -49,7 +50,8 @@ let private concatRow (segments: string option list) =
     | _ -> parts |> String.concat " | " |> Some
 
 let build (c: Context) =
-    let cwdText = Cwd.format c.Cwd |> Some
+    let settings = Settings.fromEnv ()
+    let cwdText = Cwd.format settings.WorkspaceRoot c.Cwd |> Some
     let branchText = GitBranch.format c.Cwd
     let modelText = ModelName.format c.Model c.Effort |> Some
     let costText = CostDisplay.format c.Cost |> applyColor |> Some

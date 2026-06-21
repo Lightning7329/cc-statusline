@@ -13,6 +13,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Utils/OptionBuilder.fs" />
+    <Compile Include="Utils/Settings.fs" />
     <Compile Include="Utils/DateTime.fs" />
     <Compile Include="Utils/WorkingDirectory.fs" />
     <Compile Include="Utils/Process.fs" />
