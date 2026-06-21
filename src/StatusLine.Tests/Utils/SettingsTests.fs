@@ -1,48 +1,42 @@
-module StatusLine.Tests.Utils.SettingsTests
+namespace StatusLine.Tests.Utils.SettingsTests
 
 open System
 open Xunit
 open FsUnit.Xunit
 open StatusLine.Utils.Settings
 
-[<Fact>]
-let ``loadはgetEnvのWORKSPACE_ROOTをWorkspaceRootにマップする`` () =
-    let getEnv =
-        function
-        | "WORKSPACE_ROOT" -> Some "/workspaces/proj"
-        | _ -> None
+module Load =
 
-    (load getEnv).WorkspaceRoot |> should equal (Some "/workspaces/proj")
+    [<Fact>]
+    let ``getEnvのWORKSPACE_ROOTをWorkspaceRootにマップする`` () =
+        let getEnv =
+            function
+            | "WORKSPACE_ROOT" -> Some "/workspaces/proj"
+            | _ -> None
 
-[<Fact>]
-let ``envReaderは値が設定されている場合Someを返す`` () =
-    let key = "STATUSLINE_TEST_ENVREADER"
-    let original = Environment.GetEnvironmentVariable key
+        (load getEnv).WorkspaceRoot |> should equal (Some "/workspaces/proj")
 
-    try
-        Environment.SetEnvironmentVariable(key, "value")
-        envReader key |> should equal (Some "value")
-    finally
-        Environment.SetEnvironmentVariable(key, original)
+module EnvReader =
 
-[<Fact>]
-let ``envReaderは空文字の場合Noneに正規化する`` () =
-    let key = "STATUSLINE_TEST_ENVREADER"
-    let original = Environment.GetEnvironmentVariable key
+    let private testKey = "STATUSLINE_TEST_ENVREADER"
 
-    try
-        Environment.SetEnvironmentVariable(key, "")
-        envReader key |> should equal None
-    finally
-        Environment.SetEnvironmentVariable(key, original)
+    let private withEnv value f =
+        let original = Environment.GetEnvironmentVariable testKey
 
-[<Fact>]
-let ``envReaderは未設定の場合Noneを返す`` () =
-    let key = "STATUSLINE_TEST_ENVREADER_UNSET"
-    let original = Environment.GetEnvironmentVariable key
+        try
+            Environment.SetEnvironmentVariable(testKey, value)
+            f ()
+        finally
+            Environment.SetEnvironmentVariable(testKey, original)
 
-    try
-        Environment.SetEnvironmentVariable(key, null)
-        envReader key |> should equal None
-    finally
-        Environment.SetEnvironmentVariable(key, original)
+    [<Fact>]
+    let ``値が設定されている場合Someを返す`` () =
+        withEnv "value" (fun () -> envReader testKey |> should equal (Some "value"))
+
+    [<Fact>]
+    let ``空文字の場合Noneに正規化する`` () =
+        withEnv "" (fun () -> envReader testKey |> should equal None)
+
+    [<Fact>]
+    let ``未設定の場合Noneを返す`` () =
+        withEnv null (fun () -> envReader testKey |> should equal None)
