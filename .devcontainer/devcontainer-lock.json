@@ -19,6 +19,11 @@
       "version": "1.0.0",
       "resolved": "ghcr.io/esimkowitz/devcontainer-features/claude-code-persistence@sha256:a69dae5fa14a7d8bcdc6d05d515d17f1ad22ce6254ed1232b5f043b8c94bcc1c",
       "integrity": "sha256:a69dae5fa14a7d8bcdc6d05d515d17f1ad22ce6254ed1232b5f043b8c94bcc1c"
+    },
+    "ghcr.io/lukewiwa/features/shellcheck:0": {
+      "version": "0.2.3",
+      "resolved": "ghcr.io/lukewiwa/features/shellcheck@sha256:9d61a060404fb127ae0c3aea3adbf85869ba575ab8e612f168c82c48ef0c502e",
+      "integrity": "sha256:9d61a060404fb127ae0c3aea3adbf85869ba575ab8e612f168c82c48ef0c502e"
     }
   }
 }
