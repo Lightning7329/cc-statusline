@@ -5,30 +5,145 @@ open FsUnit.Xunit
 open StatusLine.Utils.WorkingDirectory
 
 [<Fact>]
-let ``absolutePathとWORKSPACE_ROOTが一致する場合、WORKSPACE_ROOTのディレクトリ名を返す`` () =
-    relativePath (Some "/workspaces/my-project") "/workspaces/my-project"
-    |> should equal "my-project"
+let ``project_dir と一致する場合、project_dir のディレクトリ名を返す`` () =
+    // Arrange
+    let projectDir = "/workspaces/my-project"
+    let addedDirs = []
+    let home = None
+    let absolutePath = "/workspaces/my-project"
+
+    // Act
+    let result = shorten projectDir addedDirs home absolutePath
+
+    // Assert
+    result |> should equal "my-project"
 
 [<Fact>]
-let ``absolutePathがWORKSPACE_ROOT配下の場合、ディレクトリ名プラス相対パスを返す`` () =
-    relativePath (Some "/workspaces/my-project") "/workspaces/my-project/foo/bar"
-    |> should equal "my-project/foo/bar"
+let ``project_dir 配下の場合、ディレクトリ名プラス相対パスを返す`` () =
+    // Arrange
+    let projectDir = "/workspaces/my-project"
+    let addedDirs = []
+    let home = None
+    let absolutePath = "/workspaces/my-project/foo/bar"
+
+    // Act
+    let result = shorten projectDir addedDirs home absolutePath
+
+    // Assert
+    result |> should equal "my-project/foo/bar"
 
 [<Fact>]
-let ``absolutePathがWORKSPACE_ROOTの兄弟ディレクトリの場合、my-project/../other-projectを返す`` () =
-    relativePath (Some "/workspaces/my-project") "/workspaces/other-project"
-    |> should equal "my-project/../other-project"
+let ``project_dir 末尾にスラッシュがある場合でもディレクトリ名を正しく返す`` () =
+    // Arrange
+    let projectDir = "/workspaces/my-project/"
+    let addedDirs = []
+    let home = None
+    let absolutePath = "/workspaces/my-project/foo/bar"
+
+    // Act
+    let result = shorten projectDir addedDirs home absolutePath
+
+    // Assert
+    result |> should equal "my-project/foo/bar"
 
 [<Fact>]
-let ``WORKSPACE_ROOTが未設定の場合、absolutePathをそのまま返す`` () =
-    relativePath None "/some/absolute/path" |> should equal "/some/absolute/path"
+let ``project_dir 外で added_dirs のいずれかに一致する場合、その added_dir のディレクトリ名で短縮する`` () =
+    // Arrange
+    let projectDir = "/workspaces/my-project"
+    let addedDirs = [ "/workspaces/other-project" ]
+    let home = None
+    let absolutePath = "/workspaces/other-project/src"
+
+    // Act
+    let result = shorten projectDir addedDirs home absolutePath
+
+    // Assert
+    result |> should equal "other-project/src"
+
+[<Theory>]
+[<InlineData(null)>]
+[<InlineData("/workspaces/unrelated")>]
+let ``project_dir 外かつ added_dirs 外で HOME 配下の場合、~ で短縮する`` (unrelatedAddedDir: string) =
+    // Arrange
+    let projectDir = "/workspaces/my-project"
+    let addedDirs = unrelatedAddedDir |> Option.ofObj |> Option.toList
+    let home = Some "/home/user"
+    let absolutePath = "/home/user/docs/note.md"
+
+    // Act
+    let result = shorten projectDir addedDirs home absolutePath
+
+    // Assert
+    result |> should equal "~/docs/note.md"
 
 [<Fact>]
-let ``absolutePathが全く別ツリーの場合、相対表記で返す`` () =
-    relativePath (Some "/workspaces/my-project") "/home/user/docs"
-    |> should equal "my-project/../../home/user/docs"
+let ``HOME と一致する場合、~ のみを返す`` () =
+    // Arrange
+    let projectDir = "/workspaces/my-project"
+    let addedDirs = []
+    let home = Some "/home/user"
+    let absolutePath = "/home/user"
+
+    // Act
+    let result = shorten projectDir addedDirs home absolutePath
+
+    // Assert
+    result |> should equal "~"
 
 [<Fact>]
-let ``WORKSPACE_ROOTの末尾にスラッシュがある場合でもディレクトリ名を正しく返す`` () =
-    relativePath (Some "/workspaces/my-project/") "/workspaces/my-project/foo/bar"
-    |> should equal "my-project/foo/bar"
+let ``HOME 末尾にスラッシュがある場合でも ~ で短縮する`` () =
+    // Arrange
+    let projectDir = "/workspaces/my-project"
+    let addedDirs = []
+    let home = Some "/home/user/"
+    let absolutePath = "/home/user/docs"
+
+    // Act
+    let result = shorten projectDir addedDirs home absolutePath
+
+    // Assert
+    result |> should equal "~/docs"
+
+[<Theory>]
+[<InlineData(null)>]
+[<InlineData("/home/user")>]
+let ``project_dir / added_dirs / HOME のいずれにも該当しない場合、絶対パスをそのまま返す`` (homeDir: string) =
+    // Arrange
+    let projectDir = "/workspaces/my-project"
+    let addedDirs = []
+    let home = homeDir |> Option.ofObj
+    let absolutePath = "/var/log/foo.log"
+
+    // Act
+    let result = shorten projectDir addedDirs home absolutePath
+
+    // Assert
+    result |> should equal "/var/log/foo.log"
+
+[<Fact>]
+let ``project_dir と added_dirs の双方に該当しうる場合、project_dir を優先する`` () =
+    // Arrange
+    let projectDir = "/workspaces/my-project"
+    let addedDirs = [ "/workspaces" ]
+    let home = None
+    let absolutePath = "/workspaces/my-project/src"
+
+    // Act
+    let result = shorten projectDir addedDirs home absolutePath
+
+    // Assert
+    result |> should equal "my-project/src"
+
+[<Fact>]
+let ``added_dirs に複数あり後者が一致する場合、後者で短縮する`` () =
+    // Arrange
+    let projectDir = "/workspaces/my-project"
+    let addedDirs = [ "/a"; "/b/c" ]
+    let home = None
+    let absolutePath = "/b/c/file"
+
+    // Act
+    let result = shorten projectDir addedDirs home absolutePath
+
+    // Assert
+    result |> should equal "c/file"
