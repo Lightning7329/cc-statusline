@@ -6,6 +6,17 @@ This file is generated and maintained by
 
 New release entries are inserted below this preamble in reverse-chronological order.
 
+## [0.2.1](https://github.com/Lightning7329/cc-statusline/compare/v0.2.0...v0.2.1) (2026-06-21)
+
+
+### Bug Fixes
+
+* cwd 短縮を WORKSPACE_ROOT env から workspace コンテキスト由来に変更 ([#46](https://github.com/Lightning7329/cc-statusline/issues/46)) ([6c71586](https://github.com/Lightning7329/cc-statusline/commit/6c715868cc70d407f4c747a2319abe763c5c92d4))
+* cwd 短縮を WORKSPACE_ROOT env から workspace コンテキスト由来に変更 ([#46](https://github.com/Lightning7329/cc-statusline/issues/46)) ([500b3aa](https://github.com/Lightning7329/cc-statusline/commit/500b3aa891b59d64361d064ef71dc7e8a4847802))
+* release ワークフローを release-please に統合してトリガー不発を解消 ([#38](https://github.com/Lightning7329/cc-statusline/issues/38)) ([c6f4629](https://github.com/Lightning7329/cc-statusline/commit/c6f4629504681a57b96b926c611eb077505186a1)), closes [#37](https://github.com/Lightning7329/cc-statusline/issues/37)
+* WORKSPACE_ROOT="" でのクラッシュを修正し例外を1行表示に収める ([#52](https://github.com/Lightning7329/cc-statusline/issues/52)) ([f924172](https://github.com/Lightning7329/cc-statusline/commit/f924172f859d50a6fbfda11a1b45224e06ce302b)), closes [#43](https://github.com/Lightning7329/cc-statusline/issues/43)
+* レート制限のリセット時刻をローカルタイムゾーンで表示 ([#57](https://github.com/Lightning7329/cc-statusline/issues/57)) ([b31e687](https://github.com/Lightning7329/cc-statusline/commit/b31e6874d069e549cfa10cd74a483f4af054c8a9)), closes [#47](https://github.com/Lightning7329/cc-statusline/issues/47)
+
 ## [0.2.0](https://github.com/Lightning7329/cc-statusline/compare/v0.1.1...v0.2.0) (2026-05-31)
 
 
