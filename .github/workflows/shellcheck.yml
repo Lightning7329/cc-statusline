@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - "install.sh"
+      - "**/*.sh"
       - ".github/workflows/shellcheck.yml"
   pull_request:
     branches:
       - main
     paths:
-      - "install.sh"
+      - "**/*.sh"
       - ".github/workflows/shellcheck.yml"
 
 permissions:
@@ -25,4 +25,4 @@ jobs:
 
       # shellcheck は ubuntu-latest ランナーにプリインストールされている
       - name: Run shellcheck
-        run: shellcheck install.sh
+        run: find . -name "*.sh" -print0 | xargs -0 shellcheck

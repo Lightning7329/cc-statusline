@@ -2,7 +2,7 @@
 
 set -eux
 
-cd $(dirname "$0")/..
+cd "$(dirname "$0")/.."
 
 TEST_RESULTS_DIR="src/StatusLine.Tests/TestResults"
 rm -rf "$TEST_RESULTS_DIR"

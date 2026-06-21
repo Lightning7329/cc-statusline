@@ -3,6 +3,7 @@
 set -ux
 
 for file in .devcontainer/.local/*; do
+    # shellcheck disable=SC1090  # ループで動的に読み込むため
     [ -f "$file" ] && source "$file"
 done
 
