@@ -34,7 +34,7 @@ open StatusLine.Utils.Settings
 module Load =
 
     [<Fact>]
-    let ``getEnvのWORKSPACE_ROOTをWorkspaceRootにマップする`` () = ...
+    let ``getEnv の HOME を Home にマップする`` () = ...
 
 module EnvReader =
 
@@ -47,3 +47,35 @@ module EnvReader =
 検証対象が実質1関数だけのファイルでは、無理にモジュール分割せず
 `module Xxx.Tests` のフラットな構成でよい。分割の目的は「複数関数が混在したときの
 見通し」なので、混在しないなら適用しない。
+
+## AAA パターン（引数が多くて可読性が損なわれる場合）
+
+テスト対象関数の引数が 3 つ以上あって、テスト本体で引数の役割が見えづらくなる場合は
+**AAA パターン（Arrange / Act / Assert）** を使う。各引数を意味のある名前のローカル束縛に
+切り出すことで、どの値がどの引数かをひと目で分かるようにする。
+
+- 1 ケース = 1 `[<Fact>]` を維持する（`Theory` + `MemberData` でデータ駆動化しない）。
+  `dotnet test -t` で静的にケース名が列挙できる利点を保つため。
+- 各セクションは `// Arrange` / `// Act` / `// Assert` のコメントで区切る。
+- Arrange 部分の束縛名は、テスト対象関数の引数名と一致させる。
+
+```fsharp
+[<Fact>]
+let ``project_dir 配下の場合、ディレクトリ名プラス相対パスを返す`` () =
+    // Arrange
+    let projectDir = "/workspaces/my-project"
+    let addedDirs = []
+    let home = None
+    let absolutePath = "/workspaces/my-project/foo/bar"
+
+    // Act
+    let result = shorten projectDir addedDirs home absolutePath
+
+    // Assert
+    result |> should equal "my-project/foo/bar"
+```
+
+引数が 1〜2 個程度で役割が自明な場合は AAA を使わずワンライナーで書いてよい。
+形式に縛られるより「呼び出し側で引数の意味が明確かどうか」が判断基準。
+
+参考実装: `src/StatusLine.Tests/Utils/WorkingDirectoryTests.fs`
