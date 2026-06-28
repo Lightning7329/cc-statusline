@@ -6,6 +6,25 @@ This file is generated and maintained by
 
 New release entries are inserted below this preamble in reverse-chronological order.
 
+## [0.3.0](https://github.com/Lightning7329/cc-statusline/compare/v0.2.1...v0.3.0) (2026-06-28)
+
+
+### Features
+
+* 変更行数 (+追加/-削除) を表示する LinesChanged セグメントを追加 ([bbdb367](https://github.com/Lightning7329/cc-statusline/commit/bbdb367dcc7ce93514b1818e0a33d5f26296b82e))
+* 変更行数 (+追加/-削除) を表示する LinesChanged セグメントを追加 ([7e624d1](https://github.com/Lightning7329/cc-statusline/commit/7e624d1b03e5eb092b36041b20d5b17e49b7a38d))
+
+
+### Bug Fixes
+
+* install.sh で json モジュール不在の python3-minimal に対応 ([#41](https://github.com/Lightning7329/cc-statusline/issues/41), [#49](https://github.com/Lightning7329/cc-statusline/issues/49)) ([#64](https://github.com/Lightning7329/cc-statusline/issues/64)) ([2aa1238](https://github.com/Lightning7329/cc-statusline/commit/2aa1238fce889548ae5692c39cd8f28b955b0d9c))
+* install.sh の --dir を絶対パスに正規化 ([#62](https://github.com/Lightning7329/cc-statusline/issues/62)) ([02ff217](https://github.com/Lightning7329/cc-statusline/commit/02ff2179953e71fc0b2d68cbba2311c1ecde1b07)), closes [#61](https://github.com/Lightning7329/cc-statusline/issues/61)
+
+
+### Documentation
+
+* README のモデル表示例・フォント要件・セグメント一覧を修正 ([#66](https://github.com/Lightning7329/cc-statusline/issues/66)) ([38e8c4c](https://github.com/Lightning7329/cc-statusline/commit/38e8c4c3c1147428fa6db3a1673593ceb27781c4)), closes [#48](https://github.com/Lightning7329/cc-statusline/issues/48)
+
 ## [0.2.1](https://github.com/Lightning7329/cc-statusline/compare/v0.2.0...v0.2.1) (2026-06-21)
 
 
