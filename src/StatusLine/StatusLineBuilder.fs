@@ -42,8 +42,8 @@ let tryParseInput (input: string) =
             Error(InvalidJson ex.Message)
     | ex -> Error(InvalidJson ex.Message)
 
-let private concatRow (segments: string option list) =
-    let parts = segments |> List.choose id
+let private concatRow (segments: Segment option list) =
+    let parts = segments |> List.choose id |> List.map render
 
     match parts with
     | [] -> None
@@ -51,27 +51,27 @@ let private concatRow (segments: string option list) =
 
 let build (c: Context) =
     let settings = Settings.fromEnv ()
-    let cwdText = Cwd.format settings.Home c.Workspace |> Some
-    let branchText = GitBranch.format c.Cwd
-    let modelText = ModelName.format c.Model c.Effort |> Some
-    let costText = CostDisplay.format c.Cost |> render |> Some
-    let linesText = LinesChanged.format c.Cost |> render |> Some
 
-    let contextUsage = ContextWindowUsage.format c.ContextWindow |> Option.map render
-
-    let fiveHourText = option {
+    let fiveHour = option {
         let! rateLimitEntry = c.RateLimits |> Option.bind _.FiveHour
-        return rateLimitEntry |> RateLimit.formatFiveHour |> render
+        return! RateLimit.formatFiveHour rateLimitEntry
     }
 
-    let sevenDayText = option {
+    let sevenDay = option {
         let! rateLimitEntry = c.RateLimits |> Option.bind _.SevenDay
-        return rateLimitEntry |> RateLimit.formatSevenDay |> render
+        return! RateLimit.formatSevenDay rateLimitEntry
     }
 
     [
-        [ cwdText; branchText; modelText; costText; linesText; contextUsage ]
-        [ fiveHourText; sevenDayText ]
+        [
+            Cwd.format settings.Home c.Workspace
+            GitBranch.format c.Cwd
+            ModelName.format c.Model c.Effort
+            CostDisplay.format c.Cost
+            LinesChanged.format c.Cost
+            ContextWindowUsage.format c.ContextWindow
+        ]
+        [ fiveHour; sevenDay ]
     ]
     |> List.choose concatRow
     |> String.concat "\n"
