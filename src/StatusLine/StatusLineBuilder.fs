@@ -55,6 +55,7 @@ let build (c: Context) =
     let branchText = GitBranch.format c.Cwd
     let modelText = ModelName.format c.Model c.Effort |> Some
     let costText = CostDisplay.format c.Cost |> render |> Some
+    let linesText = LinesChanged.format c.Cost |> render |> Some
 
     let contextUsage = ContextWindowUsage.format c.ContextWindow |> Option.map render
 
@@ -69,7 +70,7 @@ let build (c: Context) =
     }
 
     [
-        [ cwdText; branchText; modelText; costText; contextUsage ]
+        [ cwdText; branchText; modelText; costText; linesText; contextUsage ]
         [ fiveHourText; sevenDayText ]
     ]
     |> List.choose concatRow
