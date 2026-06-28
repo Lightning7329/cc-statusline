@@ -89,12 +89,22 @@ chmod +x "${INSTALL_DIR}/${BINARY_NAME}"
 
 printf "Installed %s to %s\n" "$BINARY_NAME" "${INSTALL_DIR}/${BINARY_NAME}"
 
-configure_settings() {
-    SETTINGS_DIR="$(dirname "$SETTINGS_FILE")"
-    mkdir -p "$SETTINGS_DIR"
+# Whether python3 is available *and* its json module can be imported.
+# python3-minimal ships without the json module (see issue #41).
+has_python_json() {
+    command -v python3 >/dev/null 2>&1 && python3 -c "import json" >/dev/null 2>&1
+}
 
-    if [ -f "$SETTINGS_FILE" ]; then
-        python3 -c "
+merge_with_jq() {
+    MERGE_TMP="$(mktemp)"
+    jq --arg cmd "${INSTALL_DIR}/${BINARY_NAME}" \
+        '.statusLine = {"type": "command", "command": $cmd}' \
+        "$SETTINGS_FILE" > "$MERGE_TMP" \
+        && mv "$MERGE_TMP" "$SETTINGS_FILE"
+}
+
+merge_with_python() {
+    python3 -c "
 import json, sys
 path = sys.argv[1]
 with open(path) as f:
@@ -104,16 +114,32 @@ with open(path, 'w') as f:
     json.dump(data, f, indent=2)
     f.write('\n')
 " "$SETTINGS_FILE" "${INSTALL_DIR}/${BINARY_NAME}"
+}
+
+write_new_settings() {
+    printf '{\n  "statusLine": {\n    "type": "command",\n    "command": "%s"\n  }\n}\n' \
+        "${INSTALL_DIR}/${BINARY_NAME}" > "$SETTINGS_FILE"
+}
+
+configure_settings() {
+    SETTINGS_DIR="$(dirname "$SETTINGS_FILE")"
+    mkdir -p "$SETTINGS_DIR"
+
+    if [ ! -f "$SETTINGS_FILE" ]; then
+        # No existing settings: write a fresh file, no JSON tooling needed.
+        write_new_settings
+    elif command -v jq >/dev/null 2>&1; then
+        merge_with_jq
+    elif has_python_json; then
+        merge_with_python
     else
-        printf '{\n  "statusLine": {\n    "type": "command",\n    "command": "%s"\n  }\n}\n' "${INSTALL_DIR}/${BINARY_NAME}" > "$SETTINGS_FILE"
+        printf "\nWarning: jq or python3 with the json module is required to update an existing %s.\n" "$SETTINGS_FILE" >&2
+        printf "Binary installed but settings not configured. Add this to %s manually:\n" "$SETTINGS_FILE" >&2
+        printf '  "statusLine": { "type": "command", "command": "%s" }\n' "${INSTALL_DIR}/${BINARY_NAME}" >&2
+        return 0
     fi
 
     printf "Configured statusLine in %s\n" "$SETTINGS_FILE"
 }
 
-if command -v python3 >/dev/null 2>&1; then
-    configure_settings
-else
-    printf "\nNote: python3 not found. Add this to %s manually:\n" "$SETTINGS_FILE"
-    printf '  "statusLine": { "type": "command", "command": "%s" }\n' "${INSTALL_DIR}/${BINARY_NAME}"
-fi
+configure_settings
