@@ -55,18 +55,25 @@ module Format =
     let ``UsedPercentageがSomeのときセグメントを返す`` () =
         let seg = format (makeContextWindow (Some 50))
         seg.IsSome |> should be True
-        seg.Value.Text |> should equal "⣿⣿⣿⣿⣿      50%"
+        seg.Value |> List.length |> should equal 2
+        (seg.Value |> List.last).Text |> should equal "⣿⣿⣿⣿⣿      50%"
+
+    [<Fact>]
+    let ``先頭に無色のctxプレフィックスを付ける`` () =
+        let head = (format (makeContextWindow (Some 50))).Value |> List.head
+        head.Text |> should equal "ctx "
+        head.Color |> should equal None
 
     [<Fact>]
     let ``0%のとき緑色を返す`` () =
-        let seg = (format (makeContextWindow (Some 0))).Value
-        int seg.Color.Value.R |> should equal 0
-        int seg.Color.Value.G |> should equal 255
-        int seg.Color.Value.B |> should equal 0
+        let span = (format (makeContextWindow (Some 0))).Value |> List.last
+        int span.Color.Value.R |> should equal 0
+        int span.Color.Value.G |> should equal 255
+        int span.Color.Value.B |> should equal 0
 
     [<Fact>]
     let ``100%のとき赤色を返す`` () =
-        let seg = (format (makeContextWindow (Some 100))).Value
-        int seg.Color.Value.R |> should equal 255
-        int seg.Color.Value.G |> should equal 0
-        int seg.Color.Value.B |> should equal 0
+        let span = (format (makeContextWindow (Some 100))).Value |> List.last
+        int span.Color.Value.R |> should equal 255
+        int span.Color.Value.G |> should equal 0
+        int span.Color.Value.B |> should equal 0

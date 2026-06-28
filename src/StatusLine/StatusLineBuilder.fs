@@ -54,27 +54,23 @@ let build (c: Context) =
     let cwdText = Cwd.format settings.Home c.Workspace |> Some
     let branchText = GitBranch.format c.Cwd
     let modelText = ModelName.format c.Model c.Effort |> Some
-    let costText = CostDisplay.format c.Cost |> applyColor |> Some
+    let costText = CostDisplay.format c.Cost |> render |> Some
+    let linesText = LinesChanged.format c.Cost |> render |> Some
 
-    let contextUsage = option {
-        let! bar = ContextWindowUsage.format c.ContextWindow |> Option.map applyColor
-        return sprintf "ctx %s" bar
-    }
+    let contextUsage = ContextWindowUsage.format c.ContextWindow |> Option.map render
 
     let fiveHourText = option {
         let! rateLimitEntry = c.RateLimits |> Option.bind _.FiveHour
-        let fiveText = rateLimitEntry |> RateLimit.formatFiveHour |> applyColor
-        return sprintf "5h %s" fiveText
+        return rateLimitEntry |> RateLimit.formatFiveHour |> render
     }
 
     let sevenDayText = option {
         let! rateLimitEntry = c.RateLimits |> Option.bind _.SevenDay
-        let sevenText = rateLimitEntry |> RateLimit.formatSevenDay |> applyColor
-        return sprintf "7d %s" sevenText
+        return rateLimitEntry |> RateLimit.formatSevenDay |> render
     }
 
     [
-        [ cwdText; branchText; modelText; costText; contextUsage ]
+        [ cwdText; branchText; modelText; costText; linesText; contextUsage ]
         [ fiveHourText; sevenDayText ]
     ]
     |> List.choose concatRow

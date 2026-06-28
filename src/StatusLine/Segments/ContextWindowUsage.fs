@@ -26,8 +26,11 @@ let format (contextWindow: ContextWindow) : Segment option = option {
     let bar = formatBar usage
     let color = StatusLine.Color.percentageToColor (float usage)
 
-    return {
-        Text = sprintf "%s %s" bar percentage
-        Color = Some color
-    }
+    return [
+        { Text = "ctx "; Color = None }
+        {
+            Text = sprintf "%s %s" bar percentage
+            Color = Some color
+        }
+    ]
 }
