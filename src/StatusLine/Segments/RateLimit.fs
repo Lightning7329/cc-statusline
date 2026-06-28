@@ -3,7 +3,7 @@ module StatusLine.Segments.RateLimit
 open StatusLine.Types.Context
 open StatusLine.Types.App
 
-let formatEntry (dateFormat: string) (entry: RateLimitEntry) : Segment =
+let formatEntry (label: string) (dateFormat: string) (entry: RateLimitEntry) : Segment =
     let resetTime =
         entry.ResetsAt
         |> StatusLine.Utils.DateTime.unixTimeToLocalDateTimeOffset
@@ -11,8 +11,10 @@ let formatEntry (dateFormat: string) (entry: RateLimitEntry) : Segment =
 
     let text = sprintf "%1.1f%% (reset at %s)" entry.UsedPercentage resetTime
     let color = StatusLine.Color.percentageToColor entry.UsedPercentage
-    { Text = text; Color = Some color }
 
-let formatFiveHour (entry: RateLimitEntry) : Segment = entry |> formatEntry "HH:mm"
+    [ { Text = label; Color = None }; { Text = text; Color = Some color } ]
 
-let formatSevenDay (entry: RateLimitEntry) : Segment = entry |> formatEntry "MM/dd HH:mm"
+let formatFiveHour (entry: RateLimitEntry) : Segment = entry |> formatEntry "5h " "HH:mm"
+
+let formatSevenDay (entry: RateLimitEntry) : Segment =
+    entry |> formatEntry "7d " "MM/dd HH:mm"

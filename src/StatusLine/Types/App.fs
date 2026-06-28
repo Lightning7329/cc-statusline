@@ -2,7 +2,9 @@ module StatusLine.Types.App
 
 open System.Drawing
 
-type Segment = { Text: string; Color: Color option }
+type Span = { Text: string; Color: Color option }
+
+type Segment = Span list
 
 type ContextDeserializeError =
     | InvalidJson of message: string
