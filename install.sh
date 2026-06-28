@@ -78,6 +78,7 @@ download "${TMPDIR_PATH}/${ARCHIVE}" "$URL"
 tar -xzf "${TMPDIR_PATH}/${ARCHIVE}" -C "$TMPDIR_PATH"
 
 mkdir -p "$INSTALL_DIR"
+INSTALL_DIR="$(cd "$INSTALL_DIR" && pwd)"
 
 if [ -f "${INSTALL_DIR}/${BINARY_NAME}" ]; then
     printf "Replacing existing %s in %s\n" "$BINARY_NAME" "$INSTALL_DIR"
