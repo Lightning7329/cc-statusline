@@ -66,8 +66,9 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 | ----------------- | -------------------------------------------------------------------- |
 | Working directory | Current directory, shortened against project / added dirs / `$HOME`  |
 | Git branch        | Current branch name, or short commit hash when in detached HEAD      |
-| Model name        | Active Claude model (e.g. `opus`, `sonnet`)                          |
+| Model name        | Active Claude model (e.g. `opus-4-8`, `sonnet-4-6`)                  |
 | Cost              | Session cost in USD                                                  |
+| Lines changed     | Lines added / removed this session (`+156/-23`, green / red)         |
 | Context window    | Braille progress bar with usage percentage                           |
 | Rate limit        | Remaining requests for context, 5-hour, and 7-day windows            |
 
@@ -75,6 +76,9 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 
 - Linux (x64, ARM64) or macOS (Intel, Apple Silicon)
 - Claude Code **v2.1.119 or later** (see [CHANGELOG.md](CHANGELOG.md) for details)
+- A font that includes Powerline glyphs (`U+E0A0`), required to render the git branch icon
+   - e.g. [Nerd Fonts](https://www.nerdfonts.com/), [Powerline-patched fonts](https://github.com/powerline/fonts), or [Cascadia Code PL](https://github.com/microsoft/cascadia-code)
+   - Some terminals (kitty, WezTerm, VS Code) can also supply these glyphs via font fallback.
 
 ## Development
 
