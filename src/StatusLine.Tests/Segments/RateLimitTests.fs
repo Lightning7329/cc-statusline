@@ -82,6 +82,7 @@ let ``formatFiveHourは5hラベルとHH:mm形式を使う`` () =
             UsedPercentage = 0.0
             ResetsAt = testTimestamp
         }
+        |> Option.get
 
     (seg |> List.head).Text |> should equal "5h "
 
@@ -95,6 +96,7 @@ let ``formatSevenDayは7dラベルとMM/dd HH:mm形式を使う`` () =
             UsedPercentage = 0.0
             ResetsAt = testTimestamp
         }
+        |> Option.get
 
     (seg |> List.head).Text |> should equal "7d "
 

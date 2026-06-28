@@ -2,8 +2,12 @@ module StatusLine.Tests.Segments.ModelNameTests
 
 open Xunit
 open FsUnit.Xunit
+open StatusLine.Types.App
 open StatusLine.Types.Context
 open StatusLine.Segments.ModelName
+
+let private segmentText seg =
+    seg |> Option.get |> List.map _.Text |> String.concat ""
 
 [<Fact>]
 let ``claude-プレフィックスを除去する`` () =
@@ -13,11 +17,14 @@ let ``claude-プレフィックスを除去する`` () =
             DisplayName = "Opus"
         }
         None
+    |> segmentText
     |> should equal "opus-4-6"
 
 [<Fact>]
 let ``claude-プレフィックスがない場合はそのまま返す`` () =
-    format { Id = "gpt-4"; DisplayName = "GPT-4" } None |> should equal "gpt-4"
+    format { Id = "gpt-4"; DisplayName = "GPT-4" } None
+    |> segmentText
+    |> should equal "gpt-4"
 
 [<Fact>]
 let ``claude-haiku系モデルも正しく変換する`` () =
@@ -27,6 +34,7 @@ let ``claude-haiku系モデルも正しく変換する`` () =
             DisplayName = "Haiku"
         }
         None
+    |> segmentText
     |> should equal "haiku-4-5"
 
 [<Fact>]
@@ -37,6 +45,7 @@ let ``effort がある場合は括弧付きで level を併記する`` () =
             DisplayName = "Opus"
         }
         (Some { Level = "high" })
+    |> segmentText
     |> should equal "opus-4-8 (high)"
 
 [<Fact>]
@@ -47,4 +56,5 @@ let ``effort がない場合は level を付けない`` () =
             DisplayName = "Opus"
         }
         None
+    |> segmentText
     |> should equal "opus-4-8"
