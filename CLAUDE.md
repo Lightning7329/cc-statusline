@@ -46,7 +46,7 @@ This separation means the test project does not need a Pastel reference.
 
 ### Module compilation order (as in .fsproj)
 
-`Utils/` (OptionBuilder, DateTime, WorkingDirectory, Process) → `Types/` (Context, App) → `Color` → `Segments/` (ContextWindowUsage, Cwd, GitBranch, ModelName, CostDisplay, RateLimit) → `ColoredOutput` → `StatusLineBuilder` → `Program`
+`Utils/` (OptionBuilder, DateTime, WorkingDirectory, Process) → `Types/` (Context, App) → `Color` → `Segments/` (ContextWindowUsage, Cwd, GitBranch, ModelName, CostDisplay, LinesChanged, ClaudeCodeVersion, RateLimit) → `ColoredOutput` → `StatusLineBuilder` → `Program`
 
 ### JSON deserialization
 

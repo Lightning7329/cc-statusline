@@ -26,6 +26,7 @@
     <Compile Include="Segments/ModelName.fs" />
     <Compile Include="Segments/CostDisplay.fs" />
     <Compile Include="Segments/LinesChanged.fs" />
+    <Compile Include="Segments/ClaudeCodeVersion.fs" />
     <Compile Include="Segments/RateLimit.fs" />
     <Compile Include="ColoredOutput.fs" />
     <Compile Include="StatusLineBuilder.fs" />
