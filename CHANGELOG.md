@@ -6,6 +6,14 @@ This file is generated and maintained by
 
 New release entries are inserted below this preamble in reverse-chronological order.
 
+## [0.4.0](https://github.com/Lightning7329/cc-statusline/compare/v0.3.0...v0.4.0) (2026-07-01)
+
+
+### Features
+
+* ClaudeCodeVersion セグメントを追加 ([#69](https://github.com/Lightning7329/cc-statusline/issues/69)) ([5c9c1b0](https://github.com/Lightning7329/cc-statusline/commit/5c9c1b04238f71a1cf329d83c13ae9880cec40a9))
+* コスト系セグメントを2行目に移動し、CostDisplay の色をオレンジに変更 ([#71](https://github.com/Lightning7329/cc-statusline/issues/71)) ([3f766c2](https://github.com/Lightning7329/cc-statusline/commit/3f766c2752c2fd2dd24384b44622037da73001f0))
+
 ## [0.3.0](https://github.com/Lightning7329/cc-statusline/compare/v0.2.1...v0.3.0) (2026-06-28)
 
 
