@@ -67,6 +67,7 @@ let build (c: Context) =
             Cwd.format settings.Home c.Workspace
             GitBranch.format c.Cwd
             ModelName.format c.Model c.Effort
+            ClaudeCodeVersion.format c.Version
             CostDisplay.format c.Cost
             LinesChanged.format c.Cost
             ContextWindowUsage.format c.ContextWindow

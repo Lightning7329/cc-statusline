@@ -15,6 +15,7 @@
     <Compile Include="Segments/ModelNameTests.fs" />
     <Compile Include="Segments/CostDisplayTests.fs" />
     <Compile Include="Segments/LinesChangedTests.fs" />
+    <Compile Include="Segments/ClaudeCodeVersionTests.fs" />
     <Compile Include="Segments/RateLimitTests.fs" />
   </ItemGroup>
   <ItemGroup>
