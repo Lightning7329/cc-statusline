@@ -68,9 +68,9 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 | Git branch        | Current branch name, or short commit hash when in detached HEAD      |
 | Model name        | Active Claude model (e.g. `opus-4-8`, `sonnet-4-6`)                  |
 | Version           | Claude Code version (e.g. `v2.1.90`)                                 |
-| Cost              | Session cost in USD                                                  |
-| Lines changed     | Lines added / removed this session (`+156/-23`, green / red)         |
 | Context window    | Braille progress bar with usage percentage                           |
+| Lines changed     | Lines added / removed this session (`+156/-23`, green / red)         |
+| Cost              | Session cost in USD                                                  |
 | Rate limit        | Remaining requests for context, 5-hour, and 7-day windows            |
 
 ## Requirements
