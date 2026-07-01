@@ -68,9 +68,11 @@ let build (c: Context) =
             GitBranch.format c.Cwd
             ModelName.format c.Model c.Effort
             ClaudeCodeVersion.format c.Version
-            CostDisplay.format c.Cost
-            LinesChanged.format c.Cost
+        ]
+        [
             ContextWindowUsage.format c.ContextWindow
+            LinesChanged.format c.Cost
+            CostDisplay.format c.Cost
         ]
         [ fiveHour; sevenDay ]
     ]

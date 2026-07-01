@@ -1,5 +1,6 @@
 module StatusLine.Tests.Segments.CostDisplayTests
 
+open System.Drawing
 open Xunit
 open FsUnit.Xunit
 open StatusLine.Types.Context
@@ -30,6 +31,6 @@ let ``コストが1.0の場合は$1.0000を返す`` () =
     |> should equal "$1.0000"
 
 [<Fact>]
-let ``現時点ではColorはNoneを返す`` () =
+let ``Colorはオレンジを返す`` () =
     (format (makeCost 0.5) |> Option.get |> List.exactlyOne).Color
-    |> should equal None
+    |> should equal (Some(Color.FromArgb(212, 162, 127)))
