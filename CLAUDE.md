@@ -32,18 +32,18 @@ F# console application targeting .NET 10. Reads a JSON `Context` from stdin, out
 
 ```
 stdin JSON → tryParseInput (Result<Context, ContextDeserializeError>)
-           → buildFromInput → buildWith (pure; returns one Segment for the
+           → buildFromInput → build (pure; returns one Segment for the
              whole status line — " | " separators and "\n" row breaks are colorless spans;
              errors become a red-span Segment)
            → ColoredOutput.render (applied once, in Program)
            → stdout
 ```
 
-Environment access (`Settings.fromEnv`) and the real git runner (`GitBranch.format`) are wired in only at `Program.fs`; `buildWith` and `buildFromInput` take both as arguments, so the whole pipeline below Program is pure and testable.
+Environment access (`Settings.fromEnv`) and the real git runner (`GitBranch.format`) are wired in only at `Program.fs`; `build` and `buildFromInput` take both as arguments, so the whole pipeline below Program is pure and testable.
 
 ### Two-layer output design
 
-1. **Text computation layer** (tested): Segment formatters and `buildWith` return `Segment` values (`Span list`) containing plain text and a `System.Drawing.Color` option. No dependency on Pastel — `open Pastel` outside `ColoredOutput` is a design violation.
+1. **Text computation layer** (tested): Segment formatters and `build` return `Segment` values (`Span list`) containing plain text and a `System.Drawing.Color` option. No dependency on Pastel — `open Pastel` outside `ColoredOutput` is a design violation.
 2. **Color application layer** (not tested): `ColoredOutput.render` wraps spans with ANSI escape codes via Pastel. Called exactly once, in `Program`.
 
 This separation means the test project does not need a Pastel reference.

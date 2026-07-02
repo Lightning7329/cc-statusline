@@ -52,7 +52,7 @@ let private concatRow (segments: Segment option list) : Segment option =
     | [] -> None
     | parts -> parts |> joinWith separator |> Some
 
-let buildWith (formatBranch: string -> Segment option) (settings: Settings) (c: Context) : Segment =
+let build (formatBranch: string -> Segment option) (settings: Settings) (c: Context) : Segment =
     [
         [
             Cwd.format settings.Home c.Workspace
@@ -81,7 +81,7 @@ let buildFromInput (formatBranch: string -> Segment option) (settings: Settings)
     match tryParseInput input with
     | Ok ctx ->
         try
-            buildWith formatBranch settings ctx
+            build formatBranch settings ctx
         with ex ->
             eprintfn "statusline error: %s" ex.Message
             errorSegment "unexpected error"

@@ -344,7 +344,7 @@ module TryParseInput =
         |> unwrapError
         |> should be (ofCase <@ MissingOrInvalidField "" @>)
 
-module BuildWith =
+module Build =
     open Fixture
 
     // 合成（行の並び・区切り・空行除去）だけを検証する。
@@ -354,14 +354,11 @@ module BuildWith =
 
     [<Fact>]
     let ``全セグメントが揃うと3行を返す`` () =
-        buildWith withBranch noHome fullContext
-        |> lines
-        |> List.length
-        |> should equal 3
+        build withBranch noHome fullContext |> lines |> List.length |> should equal 3
 
     [<Fact>]
     let ``行はcwd行・コンテキスト行・レート制限行の順に並ぶ`` () =
-        let rows = buildWith withBranch noHome fullContext |> lines
+        let rows = build withBranch noHome fullContext |> lines
 
         rows[0] |> should haveSubstring "v2.1.90"
         rows[1] |> should startWith "ctx "
@@ -370,14 +367,14 @@ module BuildWith =
 
     [<Fact>]
     let ``行内のセグメントを「 | 」で結合する`` () =
-        let firstRow = (buildWith withBranch noHome fullContext |> lines)[0]
+        let firstRow = (build withBranch noHome fullContext |> lines)[0]
 
         // cwd・ブランチ・モデル・バージョンの 4 セグメント = 区切り 3 つ
         firstRow.Split(" | ") |> Array.length |> should equal 4
 
     [<Fact>]
     let ``ブランチが取れないとき1行目のセグメントが1つ減る`` () =
-        let firstRow = (buildWith noBranch noHome fullContext |> lines)[0]
+        let firstRow = (build noBranch noHome fullContext |> lines)[0]
 
         firstRow.Split(" | ") |> Array.length |> should equal 3
 
@@ -385,7 +382,7 @@ module BuildWith =
     let ``RateLimitsが不在のときレート制限の行を出力しない`` () =
         let c = { fullContext with RateLimits = None }
 
-        buildWith withBranch noHome c |> lines |> List.length |> should equal 2
+        build withBranch noHome c |> lines |> List.length |> should equal 2
 
     [<Fact>]
     let ``HOME配下のcwdはチルダ表記で始まる`` () =
@@ -395,14 +392,14 @@ module BuildWith =
         let c = fullContext // current_dir = /current/working/directory
 
         // Act
-        let firstRow = (buildWith formatBranch settings c |> lines)[0]
+        let firstRow = (build formatBranch settings c |> lines)[0]
 
         // Assert
         firstRow |> should startWith "~/working/directory"
 
     [<Fact>]
     let ``区切りと改行のSpanは無色になる`` () =
-        buildWith withBranch noHome fullContext
+        build withBranch noHome fullContext
         |> List.filter (fun span -> span.Text = " | " || span.Text = "\n")
         |> List.forall (fun span -> span.Color = None)
         |> should equal true
