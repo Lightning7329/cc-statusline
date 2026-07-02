@@ -1,104 +1,106 @@
-module StatusLine.Tests.Segments.RateLimitTests
+namespace StatusLine.Tests.Segments.RateLimitTests
 
 open System
 open Xunit
 open FsUnit.Xunit
 open StatusLine.Types.Context
-open StatusLine.Types.App
 open StatusLine.Segments.RateLimit
 
-// 1738422000 = 2025-02-01 15:00:00 UTC
-let private testTimestamp = 1738422000L
+module internal Fixture =
+    // 1738422000 = 2025-02-01 15:00:00 UTC
+    let testTimestamp = 1738422000L
 
-let private localTimeString (format: string) =
-    DateTimeOffset.FromUnixTimeSeconds(testTimestamp).ToLocalTime().ToString format
+    let localTimeString (format: string) =
+        DateTimeOffset.FromUnixTimeSeconds(testTimestamp).ToLocalTime().ToString format
 
-[<Fact>]
-let ``0%のとき緑色を返す`` () =
-    let span =
-        formatEntry "5h " "HH:mm" {
-            UsedPercentage = 0.0
-            ResetsAt = testTimestamp
-        }
-        |> List.last
+    let makeEntry usedPercentage = {
+        UsedPercentage = usedPercentage
+        ResetsAt = testTimestamp
+    }
 
-    int span.Color.Value.R |> should equal 0
-    int span.Color.Value.G |> should equal 255
-    int span.Color.Value.B |> should equal 0
+    let makeLimits fiveHour sevenDay = {
+        FiveHour = fiveHour
+        SevenDay = sevenDay
+    }
 
-[<Fact>]
-let ``100%のとき赤色を返す`` () =
-    let span =
-        formatEntry "5h " "HH:mm" {
-            UsedPercentage = 100.0
-            ResetsAt = testTimestamp
-        }
-        |> List.last
+module FormatEntry =
+    open Fixture
 
-    int span.Color.Value.R |> should equal 255
-    int span.Color.Value.G |> should equal 0
-    int span.Color.Value.B |> should equal 0
+    [<Fact>]
+    let ``0%のとき緑色を返す`` () =
+        let span = formatEntry "5h " "HH:mm" (makeEntry 0.0) |> List.last
 
-[<Fact>]
-let ``先頭に無色のラベルを付ける`` () =
-    let head =
-        formatEntry "5h " "HH:mm" {
-            UsedPercentage = 50.0
-            ResetsAt = testTimestamp
-        }
-        |> List.head
+        int span.Color.Value.R |> should equal 0
+        int span.Color.Value.G |> should equal 255
+        int span.Color.Value.B |> should equal 0
 
-    head.Text |> should equal "5h "
-    head.Color |> should equal None
+    [<Fact>]
+    let ``100%のとき赤色を返す`` () =
+        let span = formatEntry "5h " "HH:mm" (makeEntry 100.0) |> List.last
 
-[<Fact>]
-let ``HH:mm形式でリセット時刻をフォーマットする`` () =
-    let span =
-        formatEntry "5h " "HH:mm" {
-            UsedPercentage = 50.0
-            ResetsAt = testTimestamp
-        }
-        |> List.last
+        int span.Color.Value.R |> should equal 255
+        int span.Color.Value.G |> should equal 0
+        int span.Color.Value.B |> should equal 0
 
-    span.Text
-    |> should equal (sprintf "50.0%% (reset at %s)" (localTimeString "HH:mm"))
+    [<Fact>]
+    let ``先頭に無色のラベルを付ける`` () =
+        let head = formatEntry "5h " "HH:mm" (makeEntry 50.0) |> List.head
 
-[<Fact>]
-let ``MM/dd HH:mm形式でリセット時刻をフォーマットする`` () =
-    let span =
-        formatEntry "7d " "MM/dd HH:mm" {
-            UsedPercentage = 50.0
-            ResetsAt = testTimestamp
-        }
-        |> List.last
+        head.Text |> should equal "5h "
+        head.Color |> should equal None
 
-    span.Text
-    |> should equal (sprintf "50.0%% (reset at %s)" (localTimeString "MM/dd HH:mm"))
+    [<Fact>]
+    let ``HH:mm形式でリセット時刻をフォーマットする`` () =
+        let span = formatEntry "5h " "HH:mm" (makeEntry 50.0) |> List.last
 
-[<Fact>]
-let ``formatFiveHourは5hラベルとHH:mm形式を使う`` () =
-    let seg =
-        formatFiveHour {
-            UsedPercentage = 0.0
-            ResetsAt = testTimestamp
-        }
-        |> Option.get
+        span.Text
+        |> should equal (sprintf "50.0%% (reset at %s)" (localTimeString "HH:mm"))
 
-    (seg |> List.head).Text |> should equal "5h "
+    [<Fact>]
+    let ``MM/dd HH:mm形式でリセット時刻をフォーマットする`` () =
+        let span = formatEntry "7d " "MM/dd HH:mm" (makeEntry 50.0) |> List.last
 
-    (seg |> List.last).Text
-    |> should equal (sprintf "0.0%% (reset at %s)" (localTimeString "HH:mm"))
+        span.Text
+        |> should equal (sprintf "50.0%% (reset at %s)" (localTimeString "MM/dd HH:mm"))
 
-[<Fact>]
-let ``formatSevenDayは7dラベルとMM/dd HH:mm形式を使う`` () =
-    let seg =
-        formatSevenDay {
-            UsedPercentage = 0.0
-            ResetsAt = testTimestamp
-        }
-        |> Option.get
+module FormatFiveHour =
+    open Fixture
 
-    (seg |> List.head).Text |> should equal "7d "
+    [<Fact>]
+    let ``5hラベルとHH:mm形式を使う`` () =
+        let seg = formatFiveHour (Some(makeLimits (Some(makeEntry 0.0)) None)) |> Option.get
 
-    (seg |> List.last).Text
-    |> should equal (sprintf "0.0%% (reset at %s)" (localTimeString "MM/dd HH:mm"))
+        (seg |> List.head).Text |> should equal "5h "
+
+        (seg |> List.last).Text
+        |> should equal (sprintf "0.0%% (reset at %s)" (localTimeString "HH:mm"))
+
+    [<Fact>]
+    let ``RateLimitsが不在のときNoneを返す`` () =
+        formatFiveHour None |> should equal None
+
+    [<Fact>]
+    let ``FiveHourが不在のときNoneを返す`` () =
+        formatFiveHour (Some(makeLimits None (Some(makeEntry 10.0))))
+        |> should equal None
+
+module FormatSevenDay =
+    open Fixture
+
+    [<Fact>]
+    let ``7dラベルとMM/dd HH:mm形式を使う`` () =
+        let seg = formatSevenDay (Some(makeLimits None (Some(makeEntry 0.0)))) |> Option.get
+
+        (seg |> List.head).Text |> should equal "7d "
+
+        (seg |> List.last).Text
+        |> should equal (sprintf "0.0%% (reset at %s)" (localTimeString "MM/dd HH:mm"))
+
+    [<Fact>]
+    let ``RateLimitsが不在のときNoneを返す`` () =
+        formatSevenDay None |> should equal None
+
+    [<Fact>]
+    let ``SevenDayが不在のときNoneを返す`` () =
+        formatSevenDay (Some(makeLimits (Some(makeEntry 10.0)) None))
+        |> should equal None

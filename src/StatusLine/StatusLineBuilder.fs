@@ -3,13 +3,10 @@ module StatusLine.StatusLineBuilder
 open System.Drawing
 open System.Text.Json
 open System.Text.Json.Serialization
-open Pastel
-open StatusLine.ColoredOutput
 open StatusLine.Segments
 open StatusLine.Types.App
 open StatusLine.Types.Context
-open StatusLine.Utils
-open StatusLine.Utils.OptionBuilder
+open StatusLine.Utils.Settings
 
 let private jsonOptions =
     let opts =
@@ -42,30 +39,24 @@ let tryParseInput (input: string) =
             Error(InvalidJson ex.Message)
     | ex -> Error(InvalidJson ex.Message)
 
-let private concatRow (segments: Segment option list) =
-    let parts = segments |> List.choose id |> List.map render
+let private separator: Segment = [ { Text = " | "; Color = None } ]
+let private newline: Segment = [ { Text = "\n"; Color = None } ]
 
-    match parts with
+let private joinWith (sep: Segment) (segments: Segment list) : Segment =
+    match segments with
+    | [] -> []
+    | _ -> segments |> List.reduce (fun acc segment -> acc @ sep @ segment)
+
+let private concatRow (segments: Segment option list) : Segment option =
+    match segments |> List.choose id with
     | [] -> None
-    | _ -> parts |> String.concat " | " |> Some
+    | parts -> parts |> joinWith separator |> Some
 
-let build (c: Context) =
-    let settings = Settings.fromEnv ()
-
-    let fiveHour = option {
-        let! rateLimitEntry = c.RateLimits |> Option.bind _.FiveHour
-        return! RateLimit.formatFiveHour rateLimitEntry
-    }
-
-    let sevenDay = option {
-        let! rateLimitEntry = c.RateLimits |> Option.bind _.SevenDay
-        return! RateLimit.formatSevenDay rateLimitEntry
-    }
-
+let build (formatBranch: string -> Segment option) (settings: Settings) (c: Context) : Segment =
     [
         [
             Cwd.format settings.Home c.Workspace
-            GitBranch.format c.Cwd
+            formatBranch c.Cwd
             ModelName.format c.Model c.Effort
             ClaudeCodeVersion.format c.Version
         ]
@@ -74,18 +65,25 @@ let build (c: Context) =
             LinesChanged.format c.Cost
             CostDisplay.format c.Cost
         ]
-        [ fiveHour; sevenDay ]
+        [ RateLimit.formatFiveHour c.RateLimits; RateLimit.formatSevenDay c.RateLimits ]
     ]
     |> List.choose concatRow
-    |> String.concat "\n"
+    |> joinWith newline
 
-let buildFromInput input =
+let private errorSegment (message: string) : Segment = [
+    {
+        Text = sprintf "statusline error: %s" message
+        Color = Some Color.Red
+    }
+]
+
+let buildFromInput (formatBranch: string -> Segment option) (settings: Settings) (input: string) : Segment =
     match tryParseInput input with
     | Ok ctx ->
         try
-            build ctx
+            build formatBranch settings ctx
         with ex ->
             eprintfn "statusline error: %s" ex.Message
-            "statusline error: unexpected error".Pastel Color.Red
-    | Error(InvalidJson _) -> "statusline error: invalid JSON".Pastel Color.Red
-    | Error(MissingOrInvalidField _) -> "statusline error: missing or invalid field".Pastel Color.Red
+            errorSegment "unexpected error"
+    | Error(InvalidJson _) -> errorSegment "invalid JSON"
+    | Error(MissingOrInvalidField _) -> errorSegment "missing or invalid field"
