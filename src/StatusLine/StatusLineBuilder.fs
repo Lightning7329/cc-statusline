@@ -6,7 +6,6 @@ open System.Text.Json.Serialization
 open StatusLine.Segments
 open StatusLine.Types.App
 open StatusLine.Types.Context
-open StatusLine.Utils
 open StatusLine.Utils.Settings
 
 let private jsonOptions =
@@ -78,11 +77,11 @@ let private errorSegment (message: string) : Segment = [
     }
 ]
 
-let buildFromInput (input: string) : Segment =
+let buildFromInput (formatBranch: string -> Segment option) (settings: Settings) (input: string) : Segment =
     match tryParseInput input with
     | Ok ctx ->
         try
-            buildWith GitBranch.format (Settings.fromEnv ()) ctx
+            buildWith formatBranch settings ctx
         with ex ->
             eprintfn "statusline error: %s" ex.Message
             errorSegment "unexpected error"

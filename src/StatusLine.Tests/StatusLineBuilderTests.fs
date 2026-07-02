@@ -27,6 +27,11 @@ module internal Fixture =
     let lines (segment: Segment) =
         (text segment).Split('\n') |> Array.toList
 
+    // 本番の副作用（git・環境変数）を置き換えるフェイク
+    let withBranch (_: string) = Some(GitBranch.formatBranch "main")
+    let noBranch (_: string) : Segment option = None
+    let noHome: Settings = { Home = None }
+
     // 全フィールドを含む最小限のベース JSON（sample.json 相当）
     let fullJson =
         """{
@@ -345,9 +350,6 @@ module BuildWith =
     // 合成（行の並び・区切り・空行除去）だけを検証する。
     // 各セグメントの内容・色・書式の詳細は各セグメント単体テストの管轄。
 
-    let private withBranch (_: string) = Some(GitBranch.formatBranch "main")
-    let private noBranch (_: string) : Segment option = None
-    let private noHome: Settings = { Home = None }
     let private fullContext = tryParseInput fullJson |> unwrapOk
 
     [<Fact>]
@@ -409,15 +411,22 @@ module BuildFromInput =
     open Fixture
 
     [<Fact>]
+    let ``正常なJSONのときステータスラインのSegmentを返す`` () =
+        let seg = buildFromInput withBranch noHome fullJson
+
+        seg |> lines |> List.length |> should equal 3
+        (seg |> lines)[0] |> should haveSubstring "v2.1.90"
+
+    [<Fact>]
     let ``不正なJSONのとき赤のエラーSegmentを返す`` () =
-        let seg = buildFromInput "{ invalid json }"
+        let seg = buildFromInput withBranch noHome "{ invalid json }"
 
         text seg |> should equal "statusline error: invalid JSON"
         (seg |> List.head).Color |> should equal (Some Color.Red)
 
     [<Fact>]
     let ``フィールド欠損のとき赤のエラーSegmentを返す`` () =
-        let seg = buildFromInput "{}"
+        let seg = buildFromInput withBranch noHome "{}"
 
         text seg |> should equal "statusline error: missing or invalid field"
         (seg |> List.head).Color |> should equal (Some Color.Red)

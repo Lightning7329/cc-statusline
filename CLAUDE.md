@@ -39,7 +39,7 @@ stdin JSON → tryParseInput (Result<Context, ContextDeserializeError>)
            → stdout
 ```
 
-Environment access (`Settings.fromEnv`) and the real git runner (`GitBranch.format`) are wired in only at `buildFromInput`; the test surface is `buildWith`, which takes both as arguments.
+Environment access (`Settings.fromEnv`) and the real git runner (`GitBranch.format`) are wired in only at `Program.fs`; `buildWith` and `buildFromInput` take both as arguments, so the whole pipeline below Program is pure and testable.
 
 ### Two-layer output design
 

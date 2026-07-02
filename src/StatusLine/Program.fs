@@ -1,4 +1,6 @@
-﻿let args = System.Environment.GetCommandLineArgs()
+﻿open StatusLine
+
+let args = System.Environment.GetCommandLineArgs()
 
 if args |> Array.exists (fun a -> a = "--version" || a = "-v") then
     let version =
@@ -13,8 +15,8 @@ if args |> Array.exists (fun a -> a = "--version" || a = "-v") then
 else
     try
         stdin.ReadToEnd()
-        |> StatusLine.StatusLineBuilder.buildFromInput
-        |> StatusLine.ColoredOutput.render
+        |> StatusLineBuilder.buildFromInput Segments.GitBranch.format (Utils.Settings.fromEnv ())
+        |> ColoredOutput.render
         |> printfn "%s"
     with ex ->
         eprintfn "statusline error: %s" ex.Message
