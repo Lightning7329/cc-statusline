@@ -12,7 +12,10 @@ if args |> Array.exists (fun a -> a = "--version" || a = "-v") then
     printfn "%s" version
 else
     try
-        stdin.ReadToEnd() |> StatusLine.StatusLineBuilder.buildFromInput |> printfn "%s"
+        stdin.ReadToEnd()
+        |> StatusLine.StatusLineBuilder.buildFromInput
+        |> StatusLine.ColoredOutput.render
+        |> printfn "%s"
     with ex ->
         eprintfn "statusline error: %s" ex.Message
         printfn "statusline error: unexpected error"

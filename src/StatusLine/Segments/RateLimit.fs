@@ -14,8 +14,8 @@ let formatEntry (label: string) (dateFormat: string) (entry: RateLimitEntry) : S
 
     [ { Text = label; Color = None }; { Text = text; Color = Some color } ]
 
-let formatFiveHour (entry: RateLimitEntry) : Segment option =
-    entry |> formatEntry "5h " "HH:mm" |> Some
+let formatFiveHour (limits: RateLimits option) : Segment option =
+    limits |> Option.bind _.FiveHour |> Option.map (formatEntry "5h " "HH:mm")
 
-let formatSevenDay (entry: RateLimitEntry) : Segment option =
-    entry |> formatEntry "7d " "MM/dd HH:mm" |> Some
+let formatSevenDay (limits: RateLimits option) : Segment option =
+    limits |> Option.bind _.SevenDay |> Option.map (formatEntry "7d " "MM/dd HH:mm")
