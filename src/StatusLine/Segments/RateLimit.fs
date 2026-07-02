@@ -10,7 +10,7 @@ let formatEntry (label: string) (dateFormat: string) (entry: RateLimitEntry) : S
         |> _.ToString(dateFormat)
 
     let text = sprintf "%1.1f%% (reset at %s)" entry.UsedPercentage resetTime
-    let color = StatusLine.Color.percentageToColor entry.UsedPercentage
+    let color = StatusLine.Utils.Color.percentageToColor entry.UsedPercentage
 
     [ { Text = label; Color = None }; { Text = text; Color = Some color } ]
 

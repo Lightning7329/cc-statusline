@@ -46,7 +46,7 @@ This separation means the test project does not need a Pastel reference.
 
 ### Module compilation order (as in .fsproj)
 
-`Utils/` (OptionBuilder, DateTime, WorkingDirectory, Process) → `Types/` (Context, App) → `Color` → `Segments/` (ContextWindowUsage, Cwd, GitBranch, ModelName, CostDisplay, LinesChanged, ClaudeCodeVersion, RateLimit) → `ColoredOutput` → `StatusLineBuilder` → `Program`
+`Utils/` (OptionBuilder, Settings, DateTime, WorkingDirectory, Process, Color) → `Types/` (Context, App) → `Segments/` (ContextWindowUsage, Cwd, GitBranch, ModelName, CostDisplay, LinesChanged, ClaudeCodeVersion, RateLimit) → `ColoredOutput` → `StatusLineBuilder` → `Program`
 
 ### JSON deserialization
 
@@ -54,7 +54,7 @@ FSharp.SystemTextJson with `JsonNamingPolicy.SnakeCaseLower` for automatic snake
 
 ### Color gradient
 
-`Color.percentageToColor: float → Color` interpolates from green (0%) to red (100%) in OKLCH color space using Wacton.Unicolour.
+`Utils.Color.percentageToColor: float → Color` interpolates from green (0%) to red (100%) in OKLCH color space using Wacton.Unicolour.
 
 ## Code style
 

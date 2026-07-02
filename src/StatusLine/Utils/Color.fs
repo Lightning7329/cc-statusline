@@ -1,4 +1,4 @@
-module StatusLine.Color
+module StatusLine.Utils.Color
 
 open System.Drawing
 open Wacton.Unicolour
