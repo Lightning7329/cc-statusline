@@ -1,8 +1,8 @@
-module StatusLine.Tests.ColorTests
+module StatusLine.Tests.Utils.ColorTests
 
 open Xunit
 open FsUnit.Xunit
-open StatusLine.Color
+open StatusLine.Utils.Color
 
 [<Fact>]
 let ``0.0は緑(0, 255, 0)を返す`` () =
