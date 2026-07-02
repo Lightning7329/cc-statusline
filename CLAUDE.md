@@ -32,14 +32,14 @@ F# console application targeting .NET 10. Reads a JSON `Context` from stdin, out
 
 ```
 stdin JSON → tryParseInput (Result<Context, ContextDeserializeError>)
-           → buildFromInput → build → buildWith (pure; returns one Segment for the
+           → buildFromInput → buildWith (pure; returns one Segment for the
              whole status line — " | " separators and "\n" row breaks are colorless spans;
              errors become a red-span Segment)
            → ColoredOutput.render (applied once, in Program)
            → stdout
 ```
 
-Environment access (`Settings.fromEnv`) and the real git runner (`GitBranch.format`) are wired in only at `buildFromInput` / `build`; the test surface is `buildWith`, which takes both as arguments.
+Environment access (`Settings.fromEnv`) and the real git runner (`GitBranch.format`) are wired in only at `buildFromInput`; the test surface is `buildWith`, which takes both as arguments.
 
 ### Two-layer output design
 

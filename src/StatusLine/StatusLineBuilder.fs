@@ -71,8 +71,6 @@ let buildWith (formatBranch: string -> Segment option) (settings: Settings) (c: 
     |> List.choose concatRow
     |> joinWith newline
 
-let build (settings: Settings) (c: Context) : Segment = buildWith GitBranch.format settings c
-
 let private errorSegment (message: string) : Segment = [
     {
         Text = sprintf "statusline error: %s" message
@@ -84,7 +82,7 @@ let buildFromInput (input: string) : Segment =
     match tryParseInput input with
     | Ok ctx ->
         try
-            build (Settings.fromEnv ()) ctx
+            buildWith GitBranch.format (Settings.fromEnv ()) ctx
         with ex ->
             eprintfn "statusline error: %s" ex.Message
             errorSegment "unexpected error"

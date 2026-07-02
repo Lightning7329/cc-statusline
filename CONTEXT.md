@@ -9,4 +9,4 @@
 - **行 (Row)** — `" | "` で結合されるセグメントの並び。行内の全セグメントが `None` の場合、その行は出力から除去される（空行除去）。
 - **二層設計** — テキスト計算層（純粋関数、テスト対象、Pastel 非依存）と色適用層（`ColoredOutput` / Pastel）。色適用＝`render` は Program で最後に 1 回だけ行う。テキスト計算層に `open Pastel` が現れたら設計違反。
 - **Settings** — アプリが参照する環境変数の集約レコード。`build` には引数で注入する。`Settings.fromEnv ()` を呼んでよいのは配線層（`buildFromInput` / Program）のみ。
-- **配線 (wiring)** — 本番依存（実 git、実環境変数）を純粋関数に結びつける 1 行のコード。`build = buildWith GitBranch.format` がその例。テスト面は配線の内側（`buildWith`）にある。
+- **配線 (wiring)** — 本番依存（実 git、実環境変数）を純粋関数に結びつける 1 行のコード。`buildFromInput` 内の `buildWith GitBranch.format (Settings.fromEnv ())` がその例で、本番配線はここ 1 か所に集約する。テスト面は配線の内側（`buildWith`）にある。
