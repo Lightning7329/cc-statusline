@@ -35,6 +35,6 @@
   <ItemGroup>
     <PackageReference Include="FSharp.SystemTextJson" Version="1.4.36" />
     <PackageReference Include="Pastel" Version="7.0.1" />
-    <PackageReference Include="Wacton.Unicolour" Version="7.0.0" />
+    <PackageReference Include="Wacton.Unicolour" Version="8.0.0" />
   </ItemGroup>
 </Project>
