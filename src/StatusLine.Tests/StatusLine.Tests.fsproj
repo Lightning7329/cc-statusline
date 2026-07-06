@@ -9,6 +9,7 @@
     <Compile Include="Utils/ProcessTests.fs" />
     <Compile Include="Utils/ColorTests.fs" />
     <Compile Include="Utils/OptionBuilderTests.fs" />
+    <Compile Include="Utils/DateTimeTests.fs" />
     <Compile Include="StatusLineBuilderTests.fs" />
     <Compile Include="Segments/ContextWindowUsageTests.fs" />
     <Compile Include="Segments/CwdTests.fs" />
@@ -16,6 +17,7 @@
     <Compile Include="Segments/ModelNameTests.fs" />
     <Compile Include="Segments/CostDisplayTests.fs" />
     <Compile Include="Segments/LinesChangedTests.fs" />
+    <Compile Include="Segments/SessionDurationTests.fs" />
     <Compile Include="Segments/ClaudeCodeVersionTests.fs" />
     <Compile Include="Segments/RateLimitTests.fs" />
   </ItemGroup>

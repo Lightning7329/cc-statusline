@@ -380,6 +380,13 @@ module Build =
         rows[2] |> should haveSubstring "7d "
 
     [<Fact>]
+    let ``コンテキスト行の末尾に経過時間セグメントが並ぶ`` () =
+        let rows = build withBranch noHome fullContext |> lines
+
+        // 2 行目 = ctx / lines / cost / duration。末尾は砂時計セグメント。
+        rows[1].Split(" | ") |> Array.last |> should startWith "⏳ "
+
+    [<Fact>]
     let ``行内のセグメントを「 | 」で結合する`` () =
         let firstRow = (build withBranch noHome fullContext |> lines)[0]
 

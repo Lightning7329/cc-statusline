@@ -64,6 +64,7 @@ let build (formatBranch: string -> Segment option) (settings: Settings) (c: Cont
             ContextWindowUsage.format c.ContextWindow
             LinesChanged.format c.Cost
             CostDisplay.format c.Cost
+            SessionDuration.format c.Cost
         ]
         [ RateLimit.formatFiveHour c.RateLimits; RateLimit.formatSevenDay c.RateLimits ]
     ]
