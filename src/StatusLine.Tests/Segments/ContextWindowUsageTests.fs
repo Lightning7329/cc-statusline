@@ -48,8 +48,15 @@ module Format =
     }
 
     [<Fact>]
-    let ``UsedPercentageがNoneのときNoneを返す`` () =
-        format (makeContextWindow None) |> should equal None
+    let ``Noneのとき0%を表示する`` () =
+        let seg = format (makeContextWindow None)
+        seg.IsSome |> should be True
+        (seg.Value |> List.last).Text |> should equal "           0%"
+
+    [<Fact>]
+    let ``NoneとSome0が同一の結果を返す`` () =
+        format (makeContextWindow None)
+        |> should equal (format (makeContextWindow (Some 0)))
 
     [<Fact>]
     let ``UsedPercentageがSomeのときセグメントを返す`` () =
