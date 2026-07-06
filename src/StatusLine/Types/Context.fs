@@ -80,6 +80,7 @@ type Context = {
     Cwd: string
     SessionId: string
     SessionName: string option
+    PromptId: string option
     TranscriptPath: string
     Model: Model
     Workspace: Workspace

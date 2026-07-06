@@ -38,6 +38,7 @@ module internal Fixture =
   "cwd": "/current/working/directory",
   "session_id": "abc123",
   "session_name": "my-session",
+  "prompt_id": "550e8400-e29b-41d4-a716-446655440000",
   "transcript_path": "/path/to/transcript.jsonl",
   "model": { "id": "claude-opus-4-6", "display_name": "Opus" },
   "workspace": {
@@ -102,6 +103,11 @@ module TryParseInput =
         ctx.SessionName |> should equal (Some "my-session")
 
     [<Fact>]
+    let ``全フィールドありのとき prompt_id をパースできる`` () =
+        let ctx = tryParseInput fullJson |> unwrapOk
+        ctx.PromptId |> should equal (Some "550e8400-e29b-41d4-a716-446655440000")
+
+    [<Fact>]
     let ``全フィールドありのとき vim モードをパースできる`` () =
         let ctx = tryParseInput fullJson |> unwrapOk
         ctx.Vim |> should equal (Some { Mode = "NORMAL" })
@@ -153,6 +159,14 @@ module TryParseInput =
             |> unwrapOk
 
         ctx.SessionName |> should equal None
+
+    [<Fact>]
+    let ``prompt_id がないとき None になる`` () =
+        let ctx =
+            tryParseInput (fullJson.Replace(""""prompt_id": "550e8400-e29b-41d4-a716-446655440000",""", ""))
+            |> unwrapOk
+
+        ctx.PromptId |> should equal None
 
     [<Fact>]
     let ``vim がないとき None になる`` () =
