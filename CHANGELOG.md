@@ -6,6 +6,14 @@ This file is generated and maintained by
 
 New release entries are inserted below this preamble in reverse-chronological order.
 
+## [0.4.1](https://github.com/Lightning7329/cc-statusline/compare/v0.4.0...v0.4.1) (2026-07-06)
+
+
+### Features
+
+* Context に prompt_id フィールドを追加する ([#80](https://github.com/Lightning7329/cc-statusline/issues/80)) ([8f6472d](https://github.com/Lightning7329/cc-statusline/commit/8f6472dc98a2b51b861782b242c18cd86c648b1c)), closes [#79](https://github.com/Lightning7329/cc-statusline/issues/79)
+* セッション経過時間を表示するセグメントを追加する ([#82](https://github.com/Lightning7329/cc-statusline/issues/82)) ([e206c59](https://github.com/Lightning7329/cc-statusline/commit/e206c59eb9aed99d5c83b59b7583fca6605ea7d6))
+
 ## [0.4.0](https://github.com/Lightning7329/cc-statusline/compare/v0.3.0...v0.4.0) (2026-07-01)
 
 
