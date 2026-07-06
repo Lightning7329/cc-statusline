@@ -71,6 +71,7 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 | Context window    | Braille progress bar with usage percentage                           |
 | Lines changed     | Lines added / removed this session (`+156/-23`, green / red)         |
 | Cost              | Session cost in USD                                                  |
+| Session duration  | Elapsed wall-clock time this session (`⏳ 1h 12m 3s`)                |
 | Rate limit        | Remaining requests for context, 5-hour, and 7-day windows            |
 
 ## Requirements
