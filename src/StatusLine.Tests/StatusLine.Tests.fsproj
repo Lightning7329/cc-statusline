@@ -8,6 +8,7 @@
     <Compile Include="Utils/WorkingDirectoryTests.fs" />
     <Compile Include="Utils/ProcessTests.fs" />
     <Compile Include="Utils/ColorTests.fs" />
+    <Compile Include="Utils/OptionBuilderTests.fs" />
     <Compile Include="StatusLineBuilderTests.fs" />
     <Compile Include="Segments/ContextWindowUsageTests.fs" />
     <Compile Include="Segments/CwdTests.fs" />
