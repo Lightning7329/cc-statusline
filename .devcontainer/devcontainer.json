@@ -9,13 +9,16 @@
     ],
 	"remoteEnv": {
 		"LESS": "FRX",
-		"TZ": "Asia/Tokyo"
+		"TZ": "Asia/Tokyo",
+		// workaround for claude-code-persistence
+		// ref: https://github.com/esimkowitz/devcontainer-features/issues/4
+		"PERSISTCLAUDEJSON": "true"
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	"postCreateCommand": ".devcontainer/postCreateCommand.sh",
-	"postStartCommand": "sudo npm install -g @anthropic-ai/claude-code",
+	"postStartCommand": "claude update",
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
@@ -32,7 +35,7 @@
 		}
 	},
 	"features": {
-		"ghcr.io/anthropics/devcontainer-features/claude-code": {},
+		"ghcr.io/stu-bell/devcontainer-features/claude-code": {},
 		"ghcr.io/esimkowitz/devcontainer-features/claude-code-persistence:1": {
 			"persistClaudeDir": true,
 			"persistClaudeJson": true
