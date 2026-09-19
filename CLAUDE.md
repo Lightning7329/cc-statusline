@@ -22,6 +22,9 @@ dotnet publish -c Release -r linux-x64 --self-contained
 
 # Code formatting (Fantomas)
 dotnet fantomas .
+
+# Diagnose one file (effective settings and their source, format/validity/idempotency)
+dotnet fantomas doctor src/StatusLine/Program.fs
 ```
 
 ## Architecture
@@ -62,7 +65,7 @@ FSharp.SystemTextJson with `JsonNamingPolicy.SnakeCaseLower` for automatic snake
 
 ## Code style
 
-- Format F# with Fantomas 7.0.0 (`dotnet fantomas .`)
+- Format F# with Fantomas 8.0.0 (`dotnet fantomas .`)
 - Bracket style: Stroustrup; max 2 consecutive blank lines (`.editorconfig`)
 
 ## Testing
