@@ -10,6 +10,7 @@
     <Compile Include="Utils/ColorTests.fs" />
     <Compile Include="Utils/OptionBuilderTests.fs" />
     <Compile Include="Utils/DateTimeTests.fs" />
+    <Compile Include="Utils/ErrorLogTests.fs" />
     <Compile Include="StatusLineBuilderTests.fs" />
     <Compile Include="Segments/ContextWindowUsageTests.fs" />
     <Compile Include="Segments/CwdTests.fs" />

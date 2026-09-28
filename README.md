@@ -82,6 +82,13 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
    - e.g. [Nerd Fonts](https://www.nerdfonts.com/), [Powerline-patched fonts](https://github.com/powerline/fonts), or [Cascadia Code PL](https://github.com/microsoft/cascadia-code)
    - Some terminals (kitty, WezTerm, VS Code) can also supply these glyphs via font fallback.
 
+## Troubleshooting
+
+If the status line shows `statusline error: unexpected error`, details are appended to
+`$XDG_STATE_HOME/cc-statusline/error.log` (default: `~/.local/state/cc-statusline/error.log`).
+Each entry contains the exception (with stack trace) and the JSON input received from Claude Code,
+so you can reproduce it with `cat input.json | statusline`. The log is reset once it exceeds 1 MB.
+
 ## Development
 
 See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for build instructions and local testing.
