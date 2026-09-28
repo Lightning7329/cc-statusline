@@ -26,7 +26,14 @@ else
     with ex ->
         eprintfn "statusline error: %s" ex.Message
 
-        Utils.ErrorLog.formatEntry System.DateTimeOffset.Now ex input
-        |> Utils.ErrorLog.append (Utils.ErrorLog.resolvePath Utils.Settings.envReader (System.IO.Path.GetTempPath()))
+        let logPath =
+            Utils.ErrorLog.resolvePath Utils.Settings.envReader (System.IO.Path.GetTempPath())
 
-        printfn "statusline error: unexpected error"
+        let written =
+            Utils.ErrorLog.formatEntry System.DateTimeOffset.Now ex input
+            |> Utils.ErrorLog.append logPath
+
+        if written then
+            printfn "statusline error: unexpected error (log: %s)" logPath
+        else
+            printfn "statusline error: unexpected error"

@@ -87,14 +87,14 @@ module Append =
     let ``ディレクトリがなければ作成して書き込む`` () =
         withTempDir (fun dir ->
             let path = Path.Combine(dir, "nested", "error.log")
-            append path "first"
+            append path "first" |> should equal true
             File.ReadAllText path |> should equal "first")
 
     [<Fact>]
     let ``作成したディレクトリは所有者のみアクセス可能`` () =
         withTempDir (fun dir ->
             let path = Path.Combine(dir, "nested", "error.log")
-            append path "first"
+            append path "first" |> ignore
 
             File.GetUnixFileMode(Path.GetDirectoryName path)
             |> should equal (UnixFileMode.UserRead ||| UnixFileMode.UserWrite ||| UnixFileMode.UserExecute))
@@ -103,8 +103,8 @@ module Append =
     let ``既存ファイルに追記する`` () =
         withTempDir (fun dir ->
             let path = Path.Combine(dir, "error.log")
-            append path "first"
-            append path "second"
+            append path "first" |> ignore
+            append path "second" |> ignore
             File.ReadAllText path |> should equal "firstsecond")
 
     [<Fact>]
@@ -113,13 +113,13 @@ module Append =
             let path = Path.Combine(dir, "error.log")
             Directory.CreateDirectory dir |> ignore
             File.WriteAllText(path, String('x', 1024 * 1024 + 1))
-            append path "new"
+            append path "new" |> ignore
             File.ReadAllText path |> should equal "new")
 
     [<Fact>]
-    let ``書き込めないパスでも例外を投げない`` () =
+    let ``書き込めないパスでも例外を投げず false を返す`` () =
         withTempDir (fun dir ->
             Directory.CreateDirectory dir |> ignore
             let blocker = Path.Combine(dir, "file")
             File.WriteAllText(blocker, "")
-            append (Path.Combine(blocker, "error.log")) "x")
+            append (Path.Combine(blocker, "error.log")) "x" |> should equal false)

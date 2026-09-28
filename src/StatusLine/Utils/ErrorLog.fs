@@ -36,8 +36,9 @@ let formatEntry (now: DateTimeOffset) (ex: exn) (input: string option) : string 
 let private ownerOnly =
     UnixFileMode.UserRead ||| UnixFileMode.UserWrite ||| UnixFileMode.UserExecute
 
-/// ログファイルへ追記する。ログ出力自体の失敗は握りつぶす（status line の表示を優先するため）。
-let append (path: string) (entry: string) : unit =
+/// ログファイルへ追記し、書き込めたかを返す。
+/// ログ出力自体の失敗は例外にせず false を返す（status line の表示を優先するため）。
+let append (path: string) (entry: string) : bool =
     try
         Directory.CreateDirectory(Path.GetDirectoryName path, ownerOnly) |> ignore
 
@@ -45,5 +46,7 @@ let append (path: string) (entry: string) : unit =
             File.WriteAllText(path, entry)
         else
             File.AppendAllText(path, entry)
+
+        true
     with _ ->
-        ()
+        false
