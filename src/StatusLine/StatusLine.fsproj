@@ -18,6 +18,7 @@
     <Compile Include="Utils/WorkingDirectory.fs" />
     <Compile Include="Utils/Process.fs" />
     <Compile Include="Utils/Color.fs" />
+    <Compile Include="Utils/ErrorLog.fs" />
     <Compile Include="Types/Context.fs" />
     <Compile Include="Types/App.fs" />
     <Compile Include="Segments/ContextWindowUsage.fs" />

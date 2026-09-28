@@ -13,11 +13,30 @@ if args |> Array.exists (fun a -> a = "--version" || a = "-v") then
 
     printfn "%s" version
 else
+    let mutable input: string option = None
+
     try
-        stdin.ReadToEnd()
+        let raw = stdin.ReadToEnd()
+        input <- Some raw
+
+        raw
         |> StatusLineBuilder.buildFromInput Segments.GitBranch.format (Utils.Settings.fromEnv ())
         |> ColoredOutput.render
         |> printfn "%s"
     with ex ->
         eprintfn "statusline error: %s" ex.Message
-        printfn "statusline error: unexpected error"
+
+        let logPath =
+            Utils.ErrorLog.resolvePath Utils.Settings.envReader (System.IO.Path.GetTempPath())
+
+        let written =
+            Utils.ErrorLog.formatEntry System.DateTimeOffset.Now ex input
+            |> Utils.ErrorLog.append logPath
+
+        (if written then
+             $"unexpected error (log: {logPath})"
+         else
+             "unexpected error")
+        |> StatusLineBuilder.errorSegment
+        |> ColoredOutput.render
+        |> printfn "%s"
