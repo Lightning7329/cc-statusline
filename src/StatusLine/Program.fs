@@ -26,9 +26,7 @@ else
     with ex ->
         eprintfn "statusline error: %s" ex.Message
 
-        Utils.ErrorLog.resolvePath Utils.Settings.envReader
-        |> Option.iter (fun path ->
-            Utils.ErrorLog.formatEntry System.DateTimeOffset.Now ex input
-            |> Utils.ErrorLog.append path)
+        Utils.ErrorLog.formatEntry System.DateTimeOffset.Now ex input
+        |> Utils.ErrorLog.append (Utils.ErrorLog.resolvePath Utils.Settings.envReader (System.IO.Path.GetTempPath()))
 
         printfn "statusline error: unexpected error"

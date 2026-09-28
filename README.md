@@ -85,7 +85,8 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 ## Troubleshooting
 
 If the status line shows `statusline error: unexpected error`, details are appended to
-`$XDG_STATE_HOME/cc-statusline/error.log` (default: `~/.local/state/cc-statusline/error.log`).
+`$XDG_STATE_HOME/cc-statusline/error.log` (default: `~/.local/state/cc-statusline/error.log`;
+falls back to the system temp directory, e.g. `/tmp/cc-statusline/error.log`, when neither is available).
 Each entry contains the exception (with stack trace) and the JSON input received from Claude Code,
 so you can reproduce it with `cat input.json | statusline`. The log is reset once it exceeds 1 MB.
 

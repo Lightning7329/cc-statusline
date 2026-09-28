@@ -8,6 +8,8 @@ open StatusLine.Utils.ErrorLog
 
 module ResolvePath =
 
+    let private tempDir = "/tmp"
+
     [<Fact>]
     let ``XDG_STATE_HOME が設定されていればその配下を返す`` () =
         let getEnv =
@@ -16,7 +18,7 @@ module ResolvePath =
             | "HOME" -> Some "/home/user"
             | _ -> None
 
-        resolvePath getEnv |> should equal (Some "/state/cc-statusline/error.log")
+        resolvePath getEnv tempDir |> should equal "/state/cc-statusline/error.log"
 
     [<Fact>]
     let ``XDG_STATE_HOME が未設定なら HOME の .local/state 配下を返す`` () =
@@ -25,8 +27,8 @@ module ResolvePath =
             | "HOME" -> Some "/home/user"
             | _ -> None
 
-        resolvePath getEnv
-        |> should equal (Some "/home/user/.local/state/cc-statusline/error.log")
+        resolvePath getEnv tempDir
+        |> should equal "/home/user/.local/state/cc-statusline/error.log"
 
     [<Fact>]
     let ``XDG_STATE_HOME が相対パスなら無視して HOME にフォールバックする`` () =
@@ -36,12 +38,22 @@ module ResolvePath =
             | "HOME" -> Some "/home/user"
             | _ -> None
 
-        resolvePath getEnv
-        |> should equal (Some "/home/user/.local/state/cc-statusline/error.log")
+        resolvePath getEnv tempDir
+        |> should equal "/home/user/.local/state/cc-statusline/error.log"
 
     [<Fact>]
-    let ``どちらも未設定なら None を返す`` () =
-        resolvePath (fun _ -> None) |> should equal None
+    let ``HOME が相対パスなら無視して一時ディレクトリにフォールバックする`` () =
+        let getEnv =
+            function
+            | "HOME" -> Some "home"
+            | _ -> None
+
+        resolvePath getEnv tempDir |> should equal "/tmp/cc-statusline/error.log"
+
+    [<Fact>]
+    let ``どちらも未設定なら一時ディレクトリ配下を返す`` () =
+        resolvePath (fun _ -> None) tempDir
+        |> should equal "/tmp/cc-statusline/error.log"
 
 module FormatEntry =
 
@@ -77,6 +89,15 @@ module Append =
             let path = Path.Combine(dir, "nested", "error.log")
             append path "first"
             File.ReadAllText path |> should equal "first")
+
+    [<Fact>]
+    let ``作成したディレクトリは所有者のみアクセス可能`` () =
+        withTempDir (fun dir ->
+            let path = Path.Combine(dir, "nested", "error.log")
+            append path "first"
+
+            File.GetUnixFileMode(Path.GetDirectoryName path)
+            |> should equal (UnixFileMode.UserRead ||| UnixFileMode.UserWrite ||| UnixFileMode.UserExecute))
 
     [<Fact>]
     let ``既存ファイルに追記する`` () =
