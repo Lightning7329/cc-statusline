@@ -71,7 +71,7 @@ let build (formatBranch: string -> Segment option) (settings: Settings) (c: Cont
     |> List.choose concatRow
     |> joinWith newline
 
-let private errorSegment (message: string) : Segment = [
+let errorSegment (message: string) : Segment = [
     {
         Text = sprintf "statusline error: %s" message
         Color = Some Color.Red
@@ -80,11 +80,6 @@ let private errorSegment (message: string) : Segment = [
 
 let buildFromInput (formatBranch: string -> Segment option) (settings: Settings) (input: string) : Segment =
     match tryParseInput input with
-    | Ok ctx ->
-        try
-            build formatBranch settings ctx
-        with ex ->
-            eprintfn "statusline error: %s" ex.Message
-            errorSegment "unexpected error"
+    | Ok ctx -> build formatBranch settings ctx
     | Error(InvalidJson _) -> errorSegment "invalid JSON"
     | Error(MissingOrInvalidField _) -> errorSegment "missing or invalid field"

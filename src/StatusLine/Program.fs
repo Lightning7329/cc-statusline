@@ -33,7 +33,10 @@ else
             Utils.ErrorLog.formatEntry System.DateTimeOffset.Now ex input
             |> Utils.ErrorLog.append logPath
 
-        if written then
-            printfn "statusline error: unexpected error (log: %s)" logPath
-        else
-            printfn "statusline error: unexpected error"
+        (if written then
+             $"unexpected error (log: {logPath})"
+         else
+             "unexpected error")
+        |> StatusLineBuilder.errorSegment
+        |> ColoredOutput.render
+        |> printfn "%s"
