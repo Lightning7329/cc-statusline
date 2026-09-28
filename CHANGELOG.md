@@ -6,6 +6,13 @@ This file is generated and maintained by
 
 New release entries are inserted below this preamble in reverse-chronological order.
 
+## [0.4.2](https://github.com/Lightning7329/cc-statusline/compare/v0.4.1...v0.4.2) (2026-09-28)
+
+
+### Features
+
+* 予期しない例外発生時にエラーログを出力する ([#97](https://github.com/Lightning7329/cc-statusline/issues/97)) ([4fd1f79](https://github.com/Lightning7329/cc-statusline/commit/4fd1f79160b06736e9a2f6e7c8ba306ee34aa242))
+
 ## [0.4.1](https://github.com/Lightning7329/cc-statusline/compare/v0.4.0...v0.4.1) (2026-07-06)
 
 
