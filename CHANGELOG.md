@@ -6,6 +6,13 @@ This file is generated and maintained by
 
 New release entries are inserted below this preamble in reverse-chronological order.
 
+## [0.4.3](https://github.com/Lightning7329/cc-statusline/compare/v0.4.2...v0.4.3) (2026-09-29)
+
+
+### Features
+
+* JSON のパースに失敗したときもエラーログに原因を記録する ([#100](https://github.com/Lightning7329/cc-statusline/issues/100)) ([f127a22](https://github.com/Lightning7329/cc-statusline/commit/f127a2289d0e9a6d0524b71f143af985ead0f953))
+
 ## [0.4.2](https://github.com/Lightning7329/cc-statusline/compare/v0.4.1...v0.4.2) (2026-09-28)
 
 
