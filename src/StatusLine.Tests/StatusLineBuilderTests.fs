@@ -430,21 +430,44 @@ module BuildFromInput =
 
     [<Fact>]
     let ``正常なJSONのときステータスラインのSegmentを返す`` () =
-        let seg = buildFromInput withBranch noHome fullJson
+        let seg = buildFromInput withBranch noHome fullJson |> unwrapOk
 
         seg |> lines |> List.length |> should equal 3
         (seg |> lines)[0] |> should haveSubstring "v2.1.90"
 
     [<Fact>]
-    let ``不正なJSONのとき赤のエラーSegmentを返す`` () =
-        let seg = buildFromInput withBranch noHome "{ invalid json }"
-
-        text seg |> should equal "statusline error: invalid JSON"
-        (seg |> List.head).Color |> should equal (Some Color.Red)
+    let ``不正なJSONのとき InvalidJson を返す`` () =
+        buildFromInput withBranch noHome "{ invalid json }"
+        |> unwrapError
+        |> should be (ofCase <@ InvalidJson "" @>)
 
     [<Fact>]
-    let ``フィールド欠損のとき赤のエラーSegmentを返す`` () =
-        let seg = buildFromInput withBranch noHome "{}"
+    let ``フィールド欠損のとき原因のパスを含む MissingOrInvalidField を返す`` () =
+        let json = fullJson.Replace(""""cwd": "/current/working/directory",""", "")
 
-        text seg |> should equal "statusline error: missing or invalid field"
-        (seg |> List.head).Color |> should equal (Some Color.Red)
+        match buildFromInput withBranch noHome json |> unwrapError with
+        | MissingOrInvalidField message -> message |> should haveSubstring "cwd"
+        | other -> failwithf "Expected MissingOrInvalidField, but got %A" other
+
+module DescribeError =
+
+    [<Fact>]
+    let ``InvalidJson は invalid JSON と表す`` () =
+        describeError (InvalidJson "detail") |> should equal "invalid JSON"
+
+    [<Fact>]
+    let ``MissingOrInvalidField は missing or invalid field と表す`` () =
+        describeError (MissingOrInvalidField "detail")
+        |> should equal "missing or invalid field"
+
+module ErrorSegment =
+
+    [<Fact>]
+    let ``statusline error: を前置した赤のSegmentを返す`` () =
+        let seg = errorSegment "invalid JSON"
+
+        Fixture.text seg |> should equal "statusline error: invalid JSON"
+
+        seg
+        |> List.forall (fun span -> span.Color = Some Color.Red)
+        |> should equal true

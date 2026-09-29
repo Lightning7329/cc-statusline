@@ -84,10 +84,13 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 
 ## Troubleshooting
 
-If the status line shows `statusline error: unexpected error`, details are appended to
+If the status line shows `statusline error: ...` (`unexpected error`, `invalid JSON`, or
+`missing or invalid field`), details are appended to
 `$XDG_STATE_HOME/cc-statusline/error.log` (default: `~/.local/state/cc-statusline/error.log`;
 falls back to the system temp directory, e.g. `/tmp/cc-statusline/error.log`, when neither is available).
-Each entry contains the exception (with stack trace) and the JSON input received from Claude Code,
+The error message shows the log path when the entry was written.
+Each entry contains the error details (the exception with stack trace, or the JSON deserialization
+error such as which field is missing) and the JSON input received from Claude Code,
 so you can reproduce it with `cat input.json | statusline`. The log is reset once it exceeds 1 MB.
 
 ## Development

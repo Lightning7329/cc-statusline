@@ -34,15 +34,17 @@ F# console application targeting .NET 10. Reads a JSON `Context` from stdin, out
 ### Data flow
 
 ```
-stdin JSON → tryParseInput (Result<Context, ContextDeserializeError>)
-           → buildFromInput → build (pure; returns one Segment for the
-             whole status line — " | " separators and "\n" row breaks are colorless spans;
-             errors become a red-span Segment)
-           → ColoredOutput.render (applied once, in Program)
-           → stdout
+stdin JSON → buildFromInput (pure; Result<Segment, ContextDeserializeError>)
+               = tryParseInput (Result<Context, ContextDeserializeError>)
+                 |> Result.map build (one Segment for the whole status line —
+                    " | " separators and "\n" row breaks are colorless spans)
+           → Program: Ok  → ColoredOutput.render (applied once) → stdout
+                      Error / unexpected exception → ErrorLog (append entry)
+                        → errorSegment (red span; describeError gives the wording)
+                        → ColoredOutput.render → stdout
 ```
 
-Environment access (`Settings.fromEnv`) and the real git runner (`GitBranch.format`) are wired in only at `Program.fs`; `build` and `buildFromInput` take both as arguments, so the whole pipeline below Program is pure and testable.
+Environment access (`Settings.fromEnv`), the real git runner (`GitBranch.format`), and error-log writing (`ErrorLog.append`) are wired in only at `Program.fs`; `build` and `buildFromInput` take both as arguments, so the whole pipeline below Program is pure and testable.
 
 ### Two-layer output design
 

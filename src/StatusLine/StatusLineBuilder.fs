@@ -78,8 +78,15 @@ let errorSegment (message: string) : Segment = [
     }
 ]
 
-let buildFromInput (formatBranch: string -> Segment option) (settings: Settings) (input: string) : Segment =
-    match tryParseInput input with
-    | Ok ctx -> build formatBranch settings ctx
-    | Error(InvalidJson _) -> errorSegment "invalid JSON"
-    | Error(MissingOrInvalidField _) -> errorSegment "missing or invalid field"
+/// エラー表示に使う、パースエラーの種類の説明
+let describeError (error: ContextDeserializeError) : string =
+    match error with
+    | InvalidJson _ -> "invalid JSON"
+    | MissingOrInvalidField _ -> "missing or invalid field"
+
+let buildFromInput
+    (formatBranch: string -> Segment option)
+    (settings: Settings)
+    (input: string)
+    : Result<Segment, ContextDeserializeError> =
+    tryParseInput input |> Result.map (build formatBranch settings)
