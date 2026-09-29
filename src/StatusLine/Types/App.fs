@@ -12,3 +12,9 @@ module Segment =
 type ContextDeserializeError =
     | InvalidJson of message: string
     | MissingOrInvalidField of message: string
+
+    /// JsonException のメッセージ（原因のフィールドのパスなどを含む）
+    member this.Message =
+        match this with
+        | InvalidJson message
+        | MissingOrInvalidField message -> message

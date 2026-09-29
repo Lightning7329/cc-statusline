@@ -445,9 +445,10 @@ module BuildFromInput =
     let ``フィールド欠損のとき原因のパスを含む MissingOrInvalidField を返す`` () =
         let json = fullJson.Replace(""""cwd": "/current/working/directory",""", "")
 
-        match buildFromInput withBranch noHome json |> unwrapError with
-        | MissingOrInvalidField message -> message |> should haveSubstring "cwd"
-        | other -> failwithf "Expected MissingOrInvalidField, but got %A" other
+        let error = buildFromInput withBranch noHome json |> unwrapError
+
+        error |> should be (ofCase <@ MissingOrInvalidField "" @>)
+        error.Message |> should haveSubstring "cwd"
 
 module DescribeError =
 
