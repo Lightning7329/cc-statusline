@@ -30,21 +30,28 @@ else
         |> ColoredOutput.render
         |> printfn "%s"
 
-    try
-        let raw = stdin.ReadToEnd()
-        input <- Some raw
+    // try 内では表示する内容を決めるだけにし、出力は try の外で 1 回だけ行う
+    // （エラー表示の出力が失敗したときに、それを予期しない例外として二重に記録しないため）
+    let outcome =
+        try
+            let raw = stdin.ReadToEnd()
+            input <- Some raw
 
-        match
-            raw
-            |> StatusLineBuilder.buildFromInput Segments.GitBranch.format (Utils.Settings.fromEnv ())
-        with
-        | Ok segment -> segment |> ColoredOutput.render |> printfn "%s"
-        | Error error ->
-            let (Types.App.InvalidJson message | Types.App.MissingOrInvalidField message) =
-                error
+            match
+                raw
+                |> StatusLineBuilder.buildFromInput Segments.GitBranch.format (Utils.Settings.fromEnv ())
+            with
+            | Ok segment -> Ok(ColoredOutput.render segment)
+            | Error error ->
+                let (Types.App.InvalidJson message | Types.App.MissingOrInvalidField message) =
+                    error
 
-            let summary = StatusLineBuilder.describeError error
-            reportError summary summary message
-    with ex ->
-        eprintfn "statusline error: %s" ex.Message
-        reportError "unexpected error" "exception" (string ex)
+                let summary = StatusLineBuilder.describeError error
+                Error(summary, summary, message)
+        with ex ->
+            eprintfn "statusline error: %s" ex.Message
+            Error("unexpected error", "exception", string ex)
+
+    match outcome with
+    | Ok text -> printfn "%s" text
+    | Error(summary, heading, detail) -> reportError summary heading detail
