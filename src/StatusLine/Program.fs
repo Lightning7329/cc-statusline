@@ -1,5 +1,6 @@
 ﻿open System
 open System.IO
+open System.Reflection
 open StatusLine
 open StatusLine.Types.App
 open StatusLine.Utils
@@ -54,23 +55,25 @@ let reportError (input: string option) (error: AppError) =
     |> ColoredOutput.render
     |> printfn "%s"
 
-let args = System.Environment.GetCommandLineArgs()
+/// アセンブリに埋め込まれたバージョン（取得できなければ "unknown"）
+let getVersion () : string =
+    Assembly.GetExecutingAssembly().GetCustomAttributes(typeof<AssemblyInformationalVersionAttribute>, false)
+    |> Array.tryHead
+    |> Option.map (fun a -> (a :?> AssemblyInformationalVersionAttribute).InformationalVersion)
+    |> Option.defaultValue "unknown"
 
-if args |> Array.exists (fun a -> a = "--version" || a = "-v") then
-    let version =
-        System.Reflection.Assembly
-            .GetExecutingAssembly()
-            .GetCustomAttributes(typeof<System.Reflection.AssemblyInformationalVersionAttribute>, false)
-        |> Array.tryHead
-        |> Option.map (fun a -> (a :?> System.Reflection.AssemblyInformationalVersionAttribute).InformationalVersion)
-        |> Option.defaultValue "unknown"
+/// stdin の JSON からステータスラインを出力する。`--version` / `-v` のときはバージョンを出力する。
+[<EntryPoint>]
+let main argv =
+    if argv |> Array.exists (fun a -> a = "--version" || a = "-v") then
+        printfn "%s" (getVersion ())
+    else
+        // 出力は try の外で行う（エラー表示の出力に失敗したとき、それを予期しない例外として二重に記録しないため）
+        match tryReadInput () with
+        | Error error -> reportError None error
+        | Ok input ->
+            match tryRender input with
+            | Ok statusLine -> printfn "%s" statusLine
+            | Error error -> reportError (Some input) error
 
-    printfn "%s" version
-else
-    // 出力は try の外で行う（エラー表示の出力に失敗したとき、それを予期しない例外として二重に記録しないため）
-    match tryReadInput () with
-    | Error error -> reportError None error
-    | Ok input ->
-        match tryRender input with
-        | Ok statusLine -> printfn "%s" statusLine
-        | Error error -> reportError (Some input) error
+    0
