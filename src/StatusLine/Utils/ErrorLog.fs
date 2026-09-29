@@ -22,7 +22,11 @@ let resolvePath (getEnv: string -> string option) (tempDir: string) : string =
 /// 1件分のログエントリを組み立てる。heading はエラーの種類（`exception` など）、detail はその内容。
 /// stdin を読む前に失敗した場合 input は None。
 let formatEntry (now: DateTimeOffset) (heading: string) (detail: string) (input: string option) : string =
-    let inputText = input |> Option.defaultValue "(not read)"
+    let inputText =
+        match input with
+        | None -> "(not read)"
+        | Some "" -> "(empty)"
+        | Some text -> text
 
     $"""===== {now.ToString "o"} =====
 [{heading}]

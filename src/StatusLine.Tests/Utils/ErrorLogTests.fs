@@ -87,6 +87,19 @@ module FormatEntry =
         // Assert
         entry |> should haveSubstring "(not read)"
 
+    [<Fact>]
+    let ``入力が空文字列なら (empty) と記録する`` () =
+        // Arrange
+        let heading = "invalid JSON"
+        let detail = "boom"
+        let input = Some ""
+
+        // Act
+        let entry = formatEntry now heading detail input
+
+        // Assert
+        entry |> should haveSubstring "(empty)"
+
 module Append =
 
     let private withTempDir (f: string -> unit) =
