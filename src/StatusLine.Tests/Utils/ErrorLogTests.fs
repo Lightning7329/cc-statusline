@@ -60,17 +60,45 @@ module FormatEntry =
     let private now = DateTimeOffset(2026, 9, 29, 12, 34, 56, TimeSpan.FromHours 9.0)
 
     [<Fact>]
-    let ``タイムスタンプ・例外・入力を含む`` () =
-        let entry =
-            formatEntry now (InvalidOperationException "boom") (Some """{"foo":1}""")
+    let ``タイムスタンプ・見出し・詳細・入力を含む`` () =
+        // Arrange
+        let heading = "missing or invalid field"
+        let detail = "Path: $.cwd"
+        let input = Some """{"foo":1}"""
 
+        // Act
+        let entry = formatEntry now heading detail input
+
+        // Assert
         entry |> should haveSubstring "2026-09-29T12:34:56.0000000+09:00"
-        entry |> should haveSubstring "System.InvalidOperationException: boom"
+        entry |> should haveSubstring "[missing or invalid field]\nPath: $.cwd"
         entry |> should haveSubstring """{"foo":1}"""
 
     [<Fact>]
     let ``入力を読む前の失敗なら (not read) と記録する`` () =
-        formatEntry now (Exception "boom") None |> should haveSubstring "(not read)"
+        // Arrange
+        let heading = "exception"
+        let detail = "boom"
+        let input = None
+
+        // Act
+        let entry = formatEntry now heading detail input
+
+        // Assert
+        entry |> should haveSubstring "(not read)"
+
+    [<Fact>]
+    let ``入力が空文字列なら (empty) と記録する`` () =
+        // Arrange
+        let heading = "invalid JSON"
+        let detail = "boom"
+        let input = Some ""
+
+        // Act
+        let entry = formatEntry now heading detail input
+
+        // Assert
+        entry |> should haveSubstring "(empty)"
 
 module Append =
 

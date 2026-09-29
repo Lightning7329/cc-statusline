@@ -21,11 +21,12 @@ let private jsonOptions =
 
     opts
 
+/// JSON として不正なら InvalidJson、フィールドの欠損や型の不一致なら MissingOrInvalidField を返す。
+/// JsonException 以外の例外は捕まえない（予期しない例外として、スタックトレースごとログに残すため）。
 let tryParseInput (input: string) =
     try
         Ok(JsonSerializer.Deserialize<Context>(input, jsonOptions))
-    with
-    | :? JsonException as ex ->
+    with :? JsonException as ex ->
         let isValidJson =
             try
                 (JsonDocument.Parse input).Dispose()
@@ -37,7 +38,6 @@ let tryParseInput (input: string) =
             Error(MissingOrInvalidField ex.Message)
         else
             Error(InvalidJson ex.Message)
-    | ex -> Error(InvalidJson ex.Message)
 
 let private separator: Segment = [ { Text = " | "; Color = None } ]
 let private newline: Segment = [ { Text = "\n"; Color = None } ]
@@ -78,8 +78,15 @@ let errorSegment (message: string) : Segment = [
     }
 ]
 
-let buildFromInput (formatBranch: string -> Segment option) (settings: Settings) (input: string) : Segment =
-    match tryParseInput input with
-    | Ok ctx -> build formatBranch settings ctx
-    | Error(InvalidJson _) -> errorSegment "invalid JSON"
-    | Error(MissingOrInvalidField _) -> errorSegment "missing or invalid field"
+/// エラー表示に使う、パースエラーの種類の説明
+let describeError (error: ContextDeserializeError) : string =
+    match error with
+    | InvalidJson _ -> "invalid JSON"
+    | MissingOrInvalidField _ -> "missing or invalid field"
+
+let buildFromInput
+    (formatBranch: string -> Segment option)
+    (settings: Settings)
+    (input: string)
+    : Result<Segment, ContextDeserializeError> =
+    tryParseInput input |> Result.map (build formatBranch settings)
