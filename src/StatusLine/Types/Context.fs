@@ -71,9 +71,9 @@ type Pr = {
 type Worktree = {
     Name: string
     Path: string
-    Branch: string
+    Branch: string option
     OriginalCwd: string
-    OriginalBranch: string
+    OriginalBranch: string option
 }
 
 type Context = {
