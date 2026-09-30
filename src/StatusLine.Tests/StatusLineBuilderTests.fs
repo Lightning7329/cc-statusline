@@ -127,9 +127,9 @@ module TryParseInput =
             (Some {
                 Name = "my-feature"
                 Path = "/path/to/.claude/worktrees/my-feature"
-                Branch = "worktree-my-feature"
+                Branch = Some "worktree-my-feature"
                 OriginalCwd = "/path/to/project"
-                OriginalBranch = "main"
+                OriginalBranch = Some "main"
             })
 
     [<Fact>]
@@ -218,6 +218,19 @@ module TryParseInput =
         ctx.RateLimits |> should equal None
 
     // --- ネストされた option の部分不在 ---
+
+    [<Fact>]
+    let ``worktree.branch と worktree.original_branch がないとき None になる`` () =
+        let json =
+            fullJson
+                .Replace(""""branch": "worktree-my-feature",""", "")
+                .Replace(""""original_cwd": "/path/to/project",""", "\"original_cwd\": \"/path/to/project\"")
+                .Replace("\"original_branch\": \"main\"", "")
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.Worktree |> Option.isSome |> should equal true
+        ctx.Worktree.Value.Branch |> should equal None
+        ctx.Worktree.Value.OriginalBranch |> should equal None
 
     [<Fact>]
     let ``rate_limits.five_hour だけないとき FiveHour が None になる`` () =
