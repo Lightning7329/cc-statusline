@@ -6,6 +6,13 @@ This file is generated and maintained by
 
 New release entries are inserted below this preamble in reverse-chronological order.
 
+## [0.4.4](https://github.com/Lightning7329/cc-statusline/compare/v0.4.3...v0.4.4) (2026-09-30)
+
+
+### Bug Fixes
+
+* worktree の branch と original_branch を省略可能にする ([#102](https://github.com/Lightning7329/cc-statusline/issues/102)) ([a6ed1d5](https://github.com/Lightning7329/cc-statusline/commit/a6ed1d5187cc5a4add6961b5989458915efe58e8))
+
 ## [0.4.3](https://github.com/Lightning7329/cc-statusline/compare/v0.4.2...v0.4.3) (2026-09-29)
 
 
