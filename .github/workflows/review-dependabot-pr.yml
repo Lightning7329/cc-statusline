@@ -1,0 +1,263 @@
+# 週次で作成される Dependabot の依存更新 PR を Claude Code に一次レビューさせる。
+# レビュー内容は PR コメントとして投稿されるだけで、Approve もマージもしない。
+# 人間がコメントを読んで Approve すると auto-merge-dependabot-pr.yml がマージする。
+name: Review Dependabot PR
+
+on:
+  # schedule は GitHub 側で数時間遅れて起動することが多く当てにならないため、手動実行のみとする。
+  workflow_dispatch:
+
+concurrency:
+  group: review-dependabot-pr
+  # 後から起動した実行が進行中のレビューを打ち消さないよう、キャンセルはしない
+  cancel-in-progress: false
+
+jobs:
+  list-prs:
+    name: List open Dependabot PRs
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+      count: ${{ steps.list.outputs.count }}
+
+    steps:
+      - name: List open Dependabot PRs
+        id: list
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Dependabot の target-branch と一致するリポジトリの既定ブランチ
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+          # 暴走防止の上限。dependabot.yml の 4 エントリはいずれも open-pull-requests-limit が
+          # 既定の 5 なので、open な PR は最大 20 件に収まる。
+          MAX_PRS: 20
+        run: |
+          set -euo pipefail
+
+          # 上限より 1 件多く取得し、超過を検知できるようにする
+          all=$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --author 'app/dependabot' \
+            --state open \
+            --base "$BASE_BRANCH" \
+            --limit "$((MAX_PRS + 1))" \
+            --json number \
+            --jq '[.[].number]')
+
+          total=$(jq 'length' <<< "$all")
+          if [ "$total" -gt "$MAX_PRS" ]; then
+            echo "::warning::open な Dependabot PR が ${total} 件あります。上限 ${MAX_PRS} 件までをレビューし、残りはスキップします。"
+          fi
+
+          numbers=$(jq -c ".[0:${MAX_PRS}]" <<< "$all")
+          count=$(jq 'length' <<< "$numbers")
+
+          {
+            echo "matrix=$(jq -cn --argjson n "$numbers" '{pr: $n}')"
+            echo "count=${count}"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo '## レビュー対象'
+            echo ''
+            if [ "$count" -eq 0 ]; then
+              echo 'open な Dependabot PR はありません。'
+            else
+              echo "${count} 件の PR をレビューします: $(jq -r 'map("#\(.)") | join(", ")' <<< "$numbers")"
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+  review:
+    name: 'Review PR #${{ matrix.pr }}'
+    needs: list-prs
+    if: needs.list-prs.outputs.count != '0'
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+      pull-requests: write
+      # Collect CI results ステップが CI の状況とログを読むために必要。
+      # permissions: を明示すると列挙していないスコープは none になるため、
+      # gh pr checks が使う checks / statuses も明示しないと
+      # Resource not accessible by integration になる。
+      actions: read
+      checks: read
+      statuses: read
+      # claude-code-action が OIDC トークンを Claude GitHub App のトークンと交換するために必要
+      id-token: write
+    strategy:
+      # 1 件のレビューが落ちても他の PR のレビューは続行する
+      fail-fast: false
+      # サブスクリプションのレート制限に当たらないよう並列度を抑える
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.list-prs.outputs.matrix) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      # Claude が使う GitHub App のトークンには actions: read が無く、
+      # additional_permissions による mcp__github_ci__* も workflow_dispatch では
+      # 有効にならない（action 側が PR のイベントコンテキストを要求するため）。
+      # actions: read を持つワークフローの GITHUB_TOKEN でここで先に収集し、ファイルで渡す。
+      - name: Collect CI results
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ matrix.pr }}
+        run: |
+          set -uo pipefail
+          mkdir -p ./tmp
+          out="./tmp/ci-status-${PR_NUMBER}.md"
+
+          # gh pr checks はチェックが失敗・保留・不在のいずれでも非ゼロで終了する。
+          # GitHub の run: は bash -e なので、ここで落とさないよう必ず結果を受け取る。
+          {
+            echo "# PR #${PR_NUMBER} の CI 結果"
+            echo
+            echo '## チェック一覧'
+            echo '```'
+          } > "$out"
+
+          if checks=$(gh pr checks "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" 2>&1); then
+            echo "$checks" >> "$out"
+          else
+            code=$?
+            echo "$checks" >> "$out"
+            echo "(gh pr checks の終了コード: ${code})" >> "$out"
+          fi
+          echo '```' >> "$out"
+
+          if ! links=$(gh pr checks "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" \
+                --json state,link --jq '.[] | select(.state == "FAILURE") | .link' 2>&1); then
+            echo "失敗したチェックの一覧を取得できませんでした: ${links}"
+            links=''
+          fi
+
+          for link in $links; do
+            run_id=$(sed -E 's#.*/runs/([0-9]+).*#\1#' <<< "$link")
+            case "$run_id" in
+              ''|*[!0-9]*) continue ;;
+            esac
+            {
+              echo
+              echo "## 失敗したチェックのログ (run ${run_id})"
+              echo '```'
+            } >> "$out"
+            if ! log=$(gh run view "$run_id" --repo "$GITHUB_REPOSITORY" --log-failed 2>&1); then
+              log="(ログを取得できませんでした) ${log}"
+            fi
+
+            # 失敗ログは先頭がランナーの起動処理、末尾が git のクリーンアップで、
+            # 肝心のエラーは中間にあることが多い。単純な先頭/末尾の切り出しでは取り逃す。
+            if [ "${#log}" -le 30000 ]; then
+              printf '%s\n' "$log" >> "$out"
+            else
+              {
+                echo "(ログ全体は ${#log} バイト。エラー行の抜粋と末尾のみ掲載)"
+                echo
+                echo '--- エラー行の抜粋 ---'
+                printf '%s\n' "$log" | grep -iE 'error|failed|failure' | head -n 80 || true
+                echo
+                echo '--- ログ末尾 ---'
+                printf '%s\n' "$log" | tail -n 120
+              } >> "$out"
+            fi
+            echo '```' >> "$out"
+          done
+
+          # レビュー内容を後から検証できるよう、渡した内容をそのままログにも残す
+          echo "----- ${out} ($(wc -c < "$out") bytes) -----"
+          cat "$out"
+
+      - name: Review with Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # github_token は渡さない。OIDC 経由で Claude GitHub App のトークンを取得し、
+          # コメントが claude[bot] 名義になる。
+          # EXECUTION CONTEXT は役割定義側の分岐キー。これが与えられているかどうかで
+          # 「CI 結果をファイルから読むか gh で取るか」「コメントをそのまま投稿するか
+          # 人間に確認するか」が決まる。行の文言を変えるときは向こうも直すこと。
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ matrix.pr }}
+            EXECUTION CONTEXT: GitHub Actions
+
+            PR #${{ matrix.pr }} をレビューしてください。
+            手順・観点・出力形式はあなたの役割定義に書かれているとおりに従ってください。
+            CI の結果は ./tmp/ci-status-${{ matrix.pr }}.md に収集済みです。
+            gh からは取得できないので、このファイルを Read で読んでください。
+
+            最後に必ず PR へコメントを投稿してください。
+          # --allowedTools は「追加」ではなく「これだけ許可」。ここに書いたものが
+          # Claude に使えるツールのすべてで、書かなかったものは実行時に拒否される。
+          #
+          # さらに .claude/agents/dependabot-reviewer.md の tools: と対で効く。
+          # --allowedTools がセッションに存在するツールを決め（足し算）、エージェント定義の
+          # tools: がそこから使えるものを絞る（引き算のみ）。つまり片方にしか無いツールは
+          # 警告もエラーも出ずに消える。ここを増減させたら必ず向こうの tools: も揃えること。
+          #
+          # 書き込みを伴うのは gh pr comment だけ。特に以下は意図的に含めていない:
+          #   - gh pr review : Approve すると auto-merge-dependabot-pr.yml が即マージする
+          #   - gh pr merge / close / edit : レビュアーの仕事ではない
+          #   - gh api : -X PUT などで上記をすべて迂回できてしまう
+          #   - gh pr checks / gh run view : App トークンでは Resource not accessible by
+          #     integration になる。CI の結果は事前収集したファイルから読ませる
+          # ここを広げるときは、迂回路を作っていないか必ず確認すること。
+          claude_args: |
+            --agent dependabot-reviewer
+            --allowedTools "Read,Grep,Glob,WebFetch,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr list:*),Bash(gh pr comment:*),Bash(gh release view:*),Bash(gh release list:*),Bash(git grep:*),Bash(git log:*)"
+
+      # claude-code-action は実行結果 JSON を $RUNNER_TEMP に書くが、ジョブ終了時に消える。
+      # ログ本文には "full output hidden for security" しか出ないため、
+      # permission_denials_count のような失敗原因を後から追えるようアーティファクトに残す。
+      # 失敗した実行からも取得したいので if: always() を付ける。
+      - name: Upload Claude execution log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: claude-execution-${{ matrix.pr }}
+          # execution_file 出力はファイルが存在するときだけ設定される。
+          # 途中で落ちて output が空のケースに備え、action が使う既定パスにフォールバックする。
+          path: ${{ steps.claude.outputs.execution_file || format('{0}/claude-execution-output.json', runner.temp) }}
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Verify a review comment was posted
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ matrix.pr }}
+        run: |
+          set -euo pipefail
+
+          # claude-code-action はツールが拒否されて何もできなかった場合でも success を返す。
+          # 実際にコメントが付いたかをここで確認し、silent failure をジョブの失敗として顕在化させる。
+          found=$(gh pr view "$PR_NUMBER" \
+            --repo "$GITHUB_REPOSITORY" \
+            --json comments \
+            --jq '[.comments[] | select(.author.login | ascii_downcase | contains("claude"))] | length')
+
+          if [ "$found" -eq 0 ]; then
+            echo "::error::PR #${PR_NUMBER} にレビューコメントが投稿されていません。実行ログの permission_denials_count を確認してください。"
+            exit 1
+          fi
+          echo "PR #${PR_NUMBER} にレビューコメントを確認しました。"
+
+      - name: Summarize review result
+        if: always()
+        env:
+          PR_NUMBER: ${{ matrix.pr }}
+          CLAUDE_CONCLUSION: ${{ steps.claude.outputs.conclusion }}
+          CLAUDE_SESSION_ID: ${{ steps.claude.outputs.session_id }}
+        run: |
+          set -euo pipefail
+
+          {
+            echo "## PR #${PR_NUMBER} のレビュー結果"
+            echo ''
+            echo "- claude-code-action の conclusion: \`${CLAUDE_CONCLUSION:-(取得できず)}\`"
+            echo "- セッション ID: \`${CLAUDE_SESSION_ID:-(取得できず)}\`"
+            echo "- 実行結果 JSON: アーティファクト \`claude-execution-${PR_NUMBER}\`"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
