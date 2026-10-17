@@ -54,6 +54,9 @@ GitHub Actions 上の許可リストは `Bash(gh pr view:*)` のようなコマ�
      `Resource not accessible by integration` で失敗する。
    - `gh pr diff <番号>` で実際の差分を見る。
    - どのパッケージが、どのバージョンから、どのバージョンに上がるのかを正確に特定する。
+     `.github/dependabot.yml` の `groups` により、minor / patch 更新（github-actions と devcontainers はメジャー更新も）は
+     エコシステム単位で 1 本の PR にまとめられる。グループ PR では含まれる**すべての**パッケージについて以降の手順を行い、
+     「更新内容」の表に全件を載せる。判定は最も重いものに合わせる。
    - 同じパッケージについて、より新しいバージョンへの別の Dependabot PR が open になっていることがある
      （`gh pr list --author app/dependabot --state open` で確認できる）。その場合はこの PR が置き換え済みである旨を書く。
 
@@ -87,7 +90,8 @@ GitHub Actions 上の許可リストは `Bash(gh pr view:*)` のようなコマ�
    - **CI は `paths` フィルタ付き（`src/**` / `StatusLine.slnx` / `.github/workflows/ci.yml`）なので、以下の PR では CI が 1 本も走らない**。
      この場合、自動チェックは存在せず、あなたのレビューが唯一のゲートになる。しかも auto-merge は「チェックが 0 本」を全成功とみなすので、
      Approve されれば即マージされる。リリースノートを特に丁寧に読むこと。
-     - `.config/dotnet-tools.json` のみを変更する PR（`fantomas` / `dotnet-reportgenerator-globaltool`）
+     - `.config/dotnet-tools.json` のみを変更する PR（`fantomas` / `dotnet-reportgenerator-globaltool` のメジャー更新、
+       またはテスト系パッケージの更新がない週のグループ PR）。テスト系パッケージと同じグループ PR なら `src/**` が変わるので CI が走る
      - `.github/workflows/` のみを変更する PR（github-actions エコシステム）。ただし `ci.yml` 自体を変更する場合は CI が走る
      - `.devcontainer/` のみを変更する PR（devcontainers エコシステム）
 
