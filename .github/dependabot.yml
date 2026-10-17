@@ -1,5 +1,6 @@
 version: 2
 updates:
+  # 配布バイナリに含まれるランタイム依存
   - package-ecosystem: nuget
     directory: /src/StatusLine
     schedule:
@@ -9,7 +10,18 @@ updates:
       timezone: Asia/Tokyo
     commit-message:
       prefix: "chore(deps)"
+    # .config/dotnet-tools.json はどの directory からも検出されるため、
+    # 開発ツールはテストプロジェクト側のエントリ（chore(dev-deps)）だけで更新する
+    ignore:
+      - dependency-name: fantomas
+      - dependency-name: dotnet-reportgenerator-globaltool
+    groups:
+      runtime:
+        update-types:
+          - minor
+          - patch
 
+  # テスト実行基盤と .config/dotnet-tools.json の開発ツール
   - package-ecosystem: nuget
     directory: /src/StatusLine.Tests
     schedule:
@@ -19,6 +31,11 @@ updates:
       timezone: Asia/Tokyo
     commit-message:
       prefix: "chore(dev-deps)"
+    groups:
+      dev-dependencies:
+        update-types:
+          - minor
+          - patch
 
   - package-ecosystem: github-actions
     directory: /
@@ -29,6 +46,11 @@ updates:
       timezone: Asia/Tokyo
     commit-message:
       prefix: "chore(dev-deps)"
+    # workflow の変更は auto-merge できず手動マージになるため、メジャー更新も含めて 1 本にまとめる
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
   - package-ecosystem: devcontainers
     directory: /
@@ -39,3 +61,7 @@ updates:
       timezone: Asia/Tokyo
     commit-message:
       prefix: "chore(dev-deps)"
+    groups:
+      devcontainers:
+        patterns:
+          - "*"
