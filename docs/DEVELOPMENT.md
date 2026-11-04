@@ -68,3 +68,17 @@ cat tmp/sample.json | dotnet run --project src/StatusLine
 # Run a published binary directly
 cat tmp/sample.json | src/StatusLine/bin/Release/net10.0/linux-arm64/publish/statusline
 ```
+
+## Watching the statusline JSON schema
+
+`.github/workflows/check-statusline-schema.yml` runs daily and compares the key paths in the official [Full JSON schema](https://code.claude.com/docs/en/statusline#available-data) example with `schema/statusline-keys.txt`. When keys are added or removed, it opens (or updates) a single PR from `bot/statusline-schema` that updates the snapshot. Merging the PR marks the diff as acknowledged; decide whether to support new fields in separate issues.
+
+The check can also be run locally (requires `curl` and `jq`):
+
+```bash
+# Updates schema/statusline-keys.txt and prints the PR body if there is a diff
+scripts/check-statusline-schema.sh
+
+# Use a local copy of the docs instead of fetching it
+DOCS_FILE=path/to/statusline.md scripts/check-statusline-schema.sh
+```

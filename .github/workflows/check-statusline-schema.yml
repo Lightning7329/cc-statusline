@@ -1,0 +1,73 @@
+# 公式ドキュメントの statusline JSON スキーマを日次で取得し、schema/statusline-keys.txt との差分があれば
+# スナップショットを更新する PR を作成する。PR のマージが「差分を確認済み」を意味する。
+# 固定ブランチを force-push するので、open な PR は常に 1 本に保たれる。
+name: Check statusline schema
+
+on:
+  # 数時間遅れて起動しても困らない用途なので schedule を使う（09:00 JST）
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+    name: Check statusline schema
+    runs-on: ubuntu-latest
+    env:
+      BRANCH: bot/statusline-schema
+      SNAPSHOT_PATH: schema/statusline-keys.txt
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # 既定ブランチのスナップショットと最新ドキュメントを比較する。
+      # 抽出に失敗した場合はここでジョブが失敗し、PR は作られない。
+      - name: Compare schema keys
+        id: check
+        env:
+          BODY_FILE: ${{ runner.temp }}/pr-body.md
+        run: scripts/check-statusline-schema.sh
+
+      - name: Create or update PR
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+          VERSION: ${{ steps.check.outputs.version }}
+          BODY_FILE: ${{ runner.temp }}/pr-body.md
+        run: |
+          set -euo pipefail
+
+          keys() { grep -v -e '^#' -e '^$'; }
+
+          # open な PR のブランチが同じキー集合を持っていれば、先頭コメント（検出日）だけの更新になるので何もしない
+          if git fetch --quiet origin "$BRANCH" 2>/dev/null &&
+            diff -q <(git show "FETCH_HEAD:$SNAPSHOT_PATH" | keys) <(keys <"$SNAPSHOT_PATH") >/dev/null &&
+            [[ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')" ]]; then
+            echo "open な PR に同じ差分が反映済みです"
+            exit 0
+          fi
+
+          title="chore(schema): statusline の JSON スキーマに差分を検出 (Claude Code $VERSION)"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$BRANCH"
+          git add "$SNAPSHOT_PATH"
+          git commit -m "$title" -m "公式ドキュメントのキー一覧の差分を schema/statusline-keys.txt に反映。"
+          git push --force origin "$BRANCH"
+
+          pr=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+          if [[ -n "$pr" ]]; then
+            gh pr edit "$pr" --title "$title" --body-file "$BODY_FILE"
+          else
+            gh pr create --base "$BASE_BRANCH" --head "$BRANCH" --title "$title" --body-file "$BODY_FILE"
+          fi
