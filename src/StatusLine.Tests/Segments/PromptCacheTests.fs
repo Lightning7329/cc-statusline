@@ -163,11 +163,15 @@ module Format =
         |> should equal (240, 128, 128)
 
     [<Fact>]
-    let ``coldのときラベルも含めて全体を灰色にする`` () =
-        format (Some coldCache)
-        |> _.Value
-        |> List.forall (fun span -> span.Color = Some Color.Gray)
-        |> should equal true
+    let ``coldのときラベルは無色にする`` () =
+        (format (Some coldCache) |> spanOf "🧊").Color |> should equal None
+
+    [<Fact>]
+    let ``coldのとき百分率と状態を灰色にする`` () =
+        let segment = format (Some coldCache)
+
+        (segment |> spanOf "%").Color |> should equal (Some Color.Gray)
+        (segment |> spanOf "cold").Color |> should equal (Some Color.Gray)
 
     [<Fact>]
     let ``coldのときヒット率に応じて色を変えない`` () =

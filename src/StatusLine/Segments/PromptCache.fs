@@ -47,11 +47,12 @@ let private formatWarm (cache: PromptCache) : Segment = [
     }
 ]
 
-/// ヒット率はセッション累計で次の要求の判断材料にならないため、全体を灰色にして沈める。
+/// ヒット率はセッション累計で次の要求の判断材料にならないため、ラベル以外を灰色にして沈める。
 /// TTL 切れの cold でも過去の expires_at が届くが、until は表示しない。
 let private formatCold (cache: PromptCache) : Segment = [
+    { Text = coldLabel; Color = None }
     {
-        Text = coldLabel + hitRatioText cache + "cold"
+        Text = hitRatioText cache + "cold"
         Color = Some Color.Gray
     }
 ]
