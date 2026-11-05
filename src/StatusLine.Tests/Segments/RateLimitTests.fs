@@ -21,6 +21,7 @@ module internal Fixture =
     let makeLimits fiveHour sevenDay = {
         FiveHour = fiveHour
         SevenDay = sevenDay
+        SpendLimit = None
     }
 
 module FormatEntry =

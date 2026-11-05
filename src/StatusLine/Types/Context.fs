@@ -49,9 +49,42 @@ type RateLimitEntry = {
     ResetsAt: int64
 }
 
+type SpendLimit = {
+    UsedPercentage: float
+    ResetsAt: int64
+    UsedUsd: float option
+    LimitUsd: float option
+    Period: string option
+}
+
 type RateLimits = {
     FiveHour: RateLimitEntry option
     SevenDay: RateLimitEntry option
+    SpendLimit: SpendLimit option
+}
+
+type LastMissCause = {
+    Causes: string list option
+    ToolsAdded: int option
+    ToolsRemoved: int option
+    SystemCharDelta: int option
+}
+
+type PromptCache = {
+    Warm: bool option
+    CachingObserved: bool option
+    Ttl: string option
+    ExpiresAt: int64 option
+    Requests: int option
+    Misses: int option
+    ExpectedRebuilds: int option
+    HitRatio: float option
+    CacheWriteTokens: int64 option
+    MissRecacheTokens: int64 option
+    LastMissAt: int64 option
+    LastMissCause: LastMissCause option
+    MissCauses: Map<string, int> option
+    RecacheTokensIfCold: int64 option
 }
 
 type Effort = { Level: string }
@@ -66,6 +99,7 @@ type Pr = {
     Number: int
     Url: string
     ReviewState: string option
+    Kind: string option
 }
 
 type Worktree = {
@@ -90,6 +124,8 @@ type Context = {
     ContextWindow: ContextWindow
     [<JsonPropertyName("exceeds_200k_tokens")>]
     Exceeds200kTokens: bool
+    PromptCache: PromptCache option
+    FastMode: bool option
     Effort: Effort option
     Thinking: Thinking
     RateLimits: RateLimits option
