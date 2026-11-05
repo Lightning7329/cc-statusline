@@ -73,7 +73,18 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 | Cost              | Session cost in USD                                                  |
 | Session duration  | Elapsed wall-clock time this session (`⏳ 1h 12m 3s`)                |
 | Rate limit        | Remaining requests for context, 5-hour, and 7-day windows            |
-| Prompt cache      | Hit ratio and warm / cold state (`cache 92% warm until 14:32`)      |
+| Prompt cache      | Prompt cache hit ratio and state, see [below](#prompt-cache)         |
+
+### Prompt cache
+
+The 🔥 / 🧊 segment shows the state of Claude's prompt cache for the main conversation.
+
+| Display                    | Meaning                                                              |
+| -------------------------- | -------------------------------------------------------------------- |
+| `🔥 92% warm until 14:32` | The cache is warm and expires at 14:32                               |
+| `🧊 92% cold`             | The cache has gone cold, so the next request re-caches the conversation |
+
+`92%` is the share of input tokens read from the cache over the whole session, so it doesn't change when the cache goes cold. The segment is hidden until the first API response, and when prompt caching isn't reported.
 
 ## Requirements
 

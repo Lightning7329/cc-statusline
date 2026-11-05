@@ -5,7 +5,8 @@ open System.Drawing
 open StatusLine.Types.Context
 open StatusLine.Types.App
 
-let private label = "cache "
+let private warmLabel = "🔥 "
+let private coldLabel = "🧊 "
 let private dimCoral = Color.FromArgb(120, 64, 64)
 
 /// ヒット率が低いほど暗く、高いほど明るいコーラルにする。
@@ -32,7 +33,7 @@ let private untilText (expiresAt: int64) : string =
     |> sprintf " until %s"
 
 let private formatWarm (cache: PromptCache) : Segment = [
-    { Text = label; Color = None }
+    { Text = warmLabel; Color = None }
     {
         Text =
             hitRatioText cache
@@ -50,7 +51,7 @@ let private formatWarm (cache: PromptCache) : Segment = [
 /// TTL 切れの cold でも過去の expires_at が届くが、until は表示しない。
 let private formatCold (cache: PromptCache) : Segment = [
     {
-        Text = label + hitRatioText cache + "cold"
+        Text = coldLabel + hitRatioText cache + "cold"
         Color = Some Color.Gray
     }
 ]

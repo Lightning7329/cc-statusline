@@ -722,7 +722,7 @@ module Build =
         let rows = build withBranch noHome fullContext |> lines
 
         // 3 行目 = 5h / 7d / cache。
-        rows[2].Split(" | ") |> Array.last |> should startWith "cache "
+        rows[2].Split(" | ") |> Array.last |> should startWith "🔥 "
 
     [<Fact>]
     let ``RateLimitsが不在でもPromptCacheがあれば3行目を出力する`` () =
@@ -731,7 +731,7 @@ module Build =
         let rows = build withBranch noHome c |> lines
 
         rows |> List.length |> should equal 3
-        rows[2] |> should startWith "cache "
+        rows[2] |> should startWith "🔥 "
 
     [<Fact>]
     let ``HOME配下のcwdはチルダ表記で始まる`` () =
