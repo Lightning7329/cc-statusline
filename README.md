@@ -73,6 +73,7 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 | Cost              | Session cost in USD                                                  |
 | Session duration  | Elapsed wall-clock time this session (`⏳ 1h 12m 3s`)                |
 | Rate limit        | Remaining requests for context, 5-hour, and 7-day windows            |
+| Prompt cache      | Hit ratio and warm / cold state (`cache 92% warm until 14:32`)      |
 
 ## Requirements
 

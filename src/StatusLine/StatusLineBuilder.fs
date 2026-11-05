@@ -66,7 +66,11 @@ let build (formatBranch: string -> Segment option) (settings: Settings) (c: Cont
             CostDisplay.format c.Cost
             SessionDuration.format c.Cost
         ]
-        [ RateLimit.formatFiveHour c.RateLimits; RateLimit.formatSevenDay c.RateLimits ]
+        [
+            RateLimit.formatFiveHour c.RateLimits
+            RateLimit.formatSevenDay c.RateLimits
+            PromptCache.format c.PromptCache
+        ]
     ]
     |> List.choose concatRow
     |> joinWith newline
