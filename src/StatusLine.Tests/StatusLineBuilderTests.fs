@@ -70,11 +70,41 @@ module internal Fixture =
     }
   },
   "exceeds_200k_tokens": false,
+  "prompt_cache": {
+    "warm": true,
+    "caching_observed": true,
+    "ttl": "1h",
+    "expires_at": 1738429200,
+    "requests": 14,
+    "misses": 2,
+    "expected_rebuilds": 1,
+    "hit_ratio": 0.91,
+    "cache_write_tokens": 352000,
+    "miss_recache_tokens": 310200,
+    "last_miss_at": 1738425230,
+    "last_miss_cause": {
+      "causes": ["tools_changed"],
+      "tools_added": 2,
+      "tools_removed": 0
+    },
+    "miss_causes": {
+      "tools_changed": 2
+    },
+    "recache_tokens_if_cold": 45000
+  },
+  "fast_mode": false,
   "effort": { "level": "high" },
   "thinking": { "enabled": true },
   "rate_limits": {
     "five_hour": { "used_percentage": 23.5, "resets_at": 1738425600 },
-    "seven_day": { "used_percentage": 41.2, "resets_at": 1738857600 }
+    "seven_day": { "used_percentage": 41.2, "resets_at": 1738857600 },
+    "spend_limit": {
+      "used_percentage": 62.8,
+      "resets_at": 1740787200,
+      "used_usd": 314.12,
+      "limit_usd": 500,
+      "period": "monthly"
+    }
   },
   "vim": { "mode": "NORMAL" },
   "agent": { "name": "security-reviewer" },
@@ -150,7 +180,78 @@ module TryParseInput =
         let ctx = tryParseInput fullJson |> unwrapOk
         ctx.ContextWindow.UsedPercentage |> should equal (Some 8)
 
+    [<Fact>]
+    let ``全フィールドありのとき rate_limits.spend_limit をパースできる`` () =
+        let ctx = tryParseInput fullJson |> unwrapOk
+
+        ctx.RateLimits.Value.SpendLimit
+        |> should
+            equal
+            (Some {
+                UsedPercentage = 62.8
+                ResetsAt = 1740787200L
+                UsedUsd = Some 314.12
+                LimitUsd = Some 500.0
+                Period = Some "monthly"
+            })
+
+    [<Fact>]
+    let ``全フィールドありのとき prompt_cache をパースできる`` () =
+        let ctx = tryParseInput fullJson |> unwrapOk
+
+        ctx.PromptCache
+        |> should
+            equal
+            (Some {
+                Warm = Some true
+                CachingObserved = Some true
+                Ttl = Some "1h"
+                ExpiresAt = Some 1738429200L
+                Requests = Some 14
+                Misses = Some 2
+                ExpectedRebuilds = Some 1
+                HitRatio = Some 0.91
+                CacheWriteTokens = Some 352000L
+                MissRecacheTokens = Some 310200L
+                LastMissAt = Some 1738425230L
+                LastMissCause =
+                    Some {
+                        Causes = Some [ "tools_changed" ]
+                        ToolsAdded = Some 2
+                        ToolsRemoved = Some 0
+                        SystemCharDelta = None
+                    }
+                MissCauses = Some(Map [ "tools_changed", 2 ])
+                RecacheTokensIfCold = Some 45000L
+            })
+
+    [<Fact>]
+    let ``全フィールドありのとき fast_mode をパースできる`` () =
+        let ctx = tryParseInput fullJson |> unwrapOk
+        ctx.FastMode |> should equal (Some false)
+
     // --- オプションフィールド不在 ---
+
+    [<Fact>]
+    let ``fast_mode がないとき None になる`` () =
+        let ctx =
+            tryParseInput (fullJson.Replace(""""fast_mode": false,""", "")) |> unwrapOk
+
+        ctx.FastMode |> should equal None
+
+    [<Fact>]
+    let ``pr.kind があるとき Some になる`` () =
+        let json =
+            fullJson.Replace("\"review_state\": \"pending\"", "\"review_state\": \"pending\", \"kind\": \"mr\"")
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.Pr.Value.Kind |> should equal (Some "mr")
+
+    [<Fact>]
+    let ``pr.kind がないとき None になる`` () =
+        let ctx = tryParseInput fullJson |> unwrapOk
+        ctx.Pr |> Option.isSome |> should equal true
+        ctx.Pr.Value.Kind |> should equal None
 
     [<Fact>]
     let ``session_name がないとき None になる`` () =
@@ -209,7 +310,14 @@ module TryParseInput =
                 """,
   "rate_limits": {
     "five_hour": { "used_percentage": 23.5, "resets_at": 1738425600 },
-    "seven_day": { "used_percentage": 41.2, "resets_at": 1738857600 }
+    "seven_day": { "used_percentage": 41.2, "resets_at": 1738857600 },
+    "spend_limit": {
+      "used_percentage": 62.8,
+      "resets_at": 1740787200,
+      "used_usd": 314.12,
+      "limit_usd": 500,
+      "period": "monthly"
+    }
   }""",
                 ""
             )
@@ -245,18 +353,205 @@ module TryParseInput =
     [<Fact>]
     let ``rate_limits.seven_day だけないとき SevenDay が None になる`` () =
         let json =
-            fullJson.Replace(
-                """,
-    "seven_day": { "used_percentage": 41.2, "resets_at": 1738857600 }""",
-                ""
-            )
+            fullJson.Replace(""""seven_day": { "used_percentage": 41.2, "resets_at": 1738857600 },""", "")
 
         let ctx = tryParseInput json |> unwrapOk
         ctx.RateLimits |> Option.isSome |> should equal true
         ctx.RateLimits.Value.SevenDay |> should equal None
         ctx.RateLimits.Value.FiveHour |> Option.isSome |> should equal true
 
+    [<Fact>]
+    let ``rate_limits.spend_limit だけないとき SpendLimit が None になる`` () =
+        let json =
+            fullJson.Replace(
+                """,
+    "spend_limit": {
+      "used_percentage": 62.8,
+      "resets_at": 1740787200,
+      "used_usd": 314.12,
+      "limit_usd": 500,
+      "period": "monthly"
+    }""",
+                ""
+            )
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.RateLimits.Value.SpendLimit |> should equal None
+        ctx.RateLimits.Value.FiveHour |> Option.isSome |> should equal true
+
+    [<Fact>]
+    let ``spend_limit の金額と期間がまだ届いていないとき None になる`` () =
+        let json =
+            fullJson.Replace(
+                """"resets_at": 1740787200,
+      "used_usd": 314.12,
+      "limit_usd": 500,
+      "period": "monthly"
+    }""",
+                """"resets_at": 1740787200
+    }"""
+            )
+
+        let ctx = tryParseInput json |> unwrapOk
+
+        ctx.RateLimits.Value.SpendLimit
+        |> should
+            equal
+            (Some {
+                UsedPercentage = 62.8
+                ResetsAt = 1740787200L
+                UsedUsd = None
+                LimitUsd = None
+                Period = None
+            })
+
+    [<Fact>]
+    let ``spend_limit.used_percentage が 100 を超えていてもパースできる`` () =
+        let json =
+            fullJson.Replace(""""used_percentage": 62.8,""", """"used_percentage": 104.5,""")
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.RateLimits.Value.SpendLimit.Value.UsedPercentage |> should equal 104.5
+
+    [<Fact>]
+    let ``prompt_cache がないとき None になる`` () =
+        // キー名を変えて、prompt_cache が届いていない状態にする（未知のキーは無視される）
+        let json = fullJson.Replace("\"prompt_cache\":", "\"not_prompt_cache\":")
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.PromptCache |> should equal None
+
+    [<Fact>]
+    let ``prompt_cache の中身が空でもパースできる`` () =
+        let json =
+            fullJson.Replace("\"prompt_cache\":", "\"prompt_cache\": {}, \"not_prompt_cache\":")
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.PromptCache.Value.Warm |> should equal None
+        ctx.PromptCache.Value.MissCauses |> should equal None
+
+    [<Fact>]
+    let ``last_miss_cause と miss_causes がないとき None になる`` () =
+        let json =
+            fullJson.Replace(
+                """"last_miss_cause": {
+      "causes": ["tools_changed"],
+      "tools_added": 2,
+      "tools_removed": 0
+    },
+    "miss_causes": {
+      "tools_changed": 2
+    },""",
+                ""
+            )
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.PromptCache.Value.LastMissCause |> should equal None
+        ctx.PromptCache.Value.MissCauses |> should equal None
+
+    // --- prompt_cache の値の範囲 ---
+
+    [<Fact>]
+    let ``last_miss_cause.system_char_delta が負の値でもパースできる`` () =
+        let json =
+            fullJson.Replace(
+                """"causes": ["tools_changed"],
+      "tools_added": 2,
+      "tools_removed": 0""",
+                """"causes": ["system_prompt_changed"],
+      "system_char_delta": -120"""
+            )
+
+        let ctx = tryParseInput json |> unwrapOk
+
+        ctx.PromptCache.Value.LastMissCause
+        |> should
+            equal
+            (Some {
+                Causes = Some [ "system_prompt_changed" ]
+                ToolsAdded = None
+                ToolsRemoved = None
+                SystemCharDelta = Some -120
+            })
+
+    [<Fact>]
+    let ``miss_causes は cause 名をそのままキーにして複数受け取れる`` () =
+        let json =
+            fullJson.Replace(
+                """"miss_causes": {
+      "tools_changed": 2
+    },""",
+                """"miss_causes": {
+      "tools_changed": 2,
+      "ttl_expired_5m": 1
+    },"""
+            )
+
+        let ctx = tryParseInput json |> unwrapOk
+
+        ctx.PromptCache.Value.MissCauses
+        |> should equal (Some(Map [ "tools_changed", 2; "ttl_expired_5m", 1 ]))
+
+    [<Fact>]
+    let ``累計トークン数が int の範囲を超えてもパースできる`` () =
+        let json =
+            fullJson
+                .Replace(""""cache_write_tokens": 352000,""", """"cache_write_tokens": 3000000000,""")
+                .Replace(""""miss_recache_tokens": 310200,""", """"miss_recache_tokens": 3000000001,""")
+                .Replace(""""recache_tokens_if_cold": 45000""", """"recache_tokens_if_cold": 3000000002""")
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.PromptCache.Value.CacheWriteTokens |> should equal (Some 3000000000L)
+        ctx.PromptCache.Value.MissRecacheTokens |> should equal (Some 3000000001L)
+        ctx.PromptCache.Value.RecacheTokensIfCold |> should equal (Some 3000000002L)
+
     // --- null フィールド ---
+
+    [<Fact>]
+    let ``prompt_cache の expires_at が null のとき None になる`` () =
+        let json =
+            fullJson.Replace(""""expires_at": 1738429200,""", """"expires_at": null,""")
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.PromptCache.Value.ExpiresAt |> should equal None
+
+    [<Fact>]
+    let ``prompt_cache の hit_ratio が null のとき None になる`` () =
+        let json = fullJson.Replace(""""hit_ratio": 0.91,""", """"hit_ratio": null,""")
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.PromptCache.Value.HitRatio |> should equal None
+
+    [<Fact>]
+    let ``prompt_cache の last_miss_at が null のとき None になる`` () =
+        let json =
+            fullJson.Replace(""""last_miss_at": 1738425230,""", """"last_miss_at": null,""")
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.PromptCache.Value.LastMissAt |> should equal None
+
+    [<Fact>]
+    let ``prompt_cache の last_miss_cause が null のとき None になる`` () =
+        let json =
+            fullJson.Replace(
+                """"last_miss_cause": {
+      "causes": ["tools_changed"],
+      "tools_added": 2,
+      "tools_removed": 0
+    },""",
+                """"last_miss_cause": null,"""
+            )
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.PromptCache.Value.LastMissCause |> should equal None
+
+    [<Fact>]
+    let ``prompt_cache の recache_tokens_if_cold が null のとき None になる`` () =
+        let json =
+            fullJson.Replace(""""recache_tokens_if_cold": 45000""", """"recache_tokens_if_cold": null""")
+
+        let ctx = tryParseInput json |> unwrapOk
+        ctx.PromptCache.Value.RecacheTokensIfCold |> should equal None
 
     [<Fact>]
     let ``context_window.current_usage が null のとき None になる`` () =
