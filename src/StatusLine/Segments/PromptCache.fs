@@ -7,18 +7,17 @@ open StatusLine.Types.App
 
 let private warmLabel = "🔥 "
 let private coldLabel = "🧊 "
+/// rgb(120, 64, 64)
 let private dimCoral = Color.FromArgb(120, 64, 64)
+/// rgb(240, 128, 128)
+let private brightCoral = Color.LightCoral
 
 /// ヒット率が低いほど暗く、高いほど明るいコーラルにする。
 let private coralByHitRatio (hitRatio: float) : Color =
     let mix (dim: byte) (bright: byte) =
         int (Math.Round(float dim + float (int bright - int dim) * hitRatio))
 
-    Color.FromArgb(
-        mix dimCoral.R Color.LightCoral.R,
-        mix dimCoral.G Color.LightCoral.G,
-        mix dimCoral.B Color.LightCoral.B
-    )
+    Color.FromArgb(mix dimCoral.R brightCoral.R, mix dimCoral.G brightCoral.G, mix dimCoral.B brightCoral.B)
 
 /// `/usage` の `Prompt cache (main)` 行と同じ値になるよう、0.5 は常に切り上げる。
 let private hitRatioText (cache: PromptCache) : string =
@@ -42,7 +41,7 @@ let private formatWarm (cache: PromptCache) : Segment = [
         Color =
             cache.HitRatio
             |> Option.map coralByHitRatio
-            |> Option.defaultValue Color.LightCoral
+            |> Option.defaultValue brightCoral
             |> Some
     }
 ]
