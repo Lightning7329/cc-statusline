@@ -25,19 +25,17 @@ let private hitRatioText (cache: PromptCache) : string =
     |> Option.map (fun hitRatio -> sprintf "%d%% " (int (Math.Round(hitRatio * 100.0, MidpointRounding.AwayFromZero))))
     |> Option.defaultValue ""
 
-let private untilText (expiresAt: int64) : string =
-    expiresAt
-    |> StatusLine.Utils.DateTime.unixTimeToLocalDateTimeOffset
-    |> _.ToString("HH:mm")
-    |> sprintf " until %s"
+/// 期限は補足情報なので、日時に変換できない値でもステータスライン全体を落とさず省く。
+let private untilText (cache: PromptCache) : string =
+    cache.ExpiresAt
+    |> Option.bind StatusLine.Utils.DateTime.tryUnixTimeToLocalDateTimeOffset
+    |> Option.map (fun expiresAt -> sprintf " until %s" (expiresAt.ToString "HH:mm"))
+    |> Option.defaultValue ""
 
 let private formatWarm (cache: PromptCache) : Segment = [
     { Text = warmLabel; Color = None }
     {
-        Text =
-            hitRatioText cache
-            + "warm"
-            + (cache.ExpiresAt |> Option.map untilText |> Option.defaultValue "")
+        Text = hitRatioText cache + "warm" + untilText cache
         Color =
             cache.HitRatio
             |> Option.map coralByHitRatio
@@ -56,9 +54,16 @@ let private formatCold (cache: PromptCache) : Segment = [
     }
 ]
 
+/// 範囲外のヒット率は `Color.FromArgb` の例外や 100% を超える表示につながるため、0 から 1 に収める。
+let private clampHitRatio (cache: PromptCache) : PromptCache = {
+    cache with
+        HitRatio = cache.HitRatio |> Option.map (fun hitRatio -> Math.Clamp(hitRatio, 0.0, 1.0))
+}
+
 let format (promptCache: PromptCache option) : Segment option =
     promptCache
     |> Option.filter (fun cache -> cache.CachingObserved <> Some false)
+    |> Option.map clampHitRatio
     |> Option.bind (fun cache ->
         match cache.Warm with
         | Some true -> Some(formatWarm cache)

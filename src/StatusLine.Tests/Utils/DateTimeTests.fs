@@ -41,3 +41,36 @@ module MsToDuration =
     [<Fact>]
     let ``負値は0に丸める`` () =
         msToDuration -5000 |> should equal { Hours = 0; Minutes = 0; Seconds = 0 }
+
+module TryUnixTimeToLocalDateTimeOffset =
+
+    // 9999-12-31 23:59:59 UTC
+    let private maxUnixTime = 253402300799L
+    // 0001-01-01 00:00:00 UTC
+    let private minUnixTime = -62135596800L
+
+    [<Fact>]
+    let ``表せる範囲の値はSomeを返す`` () =
+        tryUnixTimeToLocalDateTimeOffset 1738422000L
+        |> Option.map _.ToUnixTimeSeconds()
+        |> should equal (Some 1738422000L)
+
+    [<Fact>]
+    let ``上限の値はSomeを返す`` () =
+        tryUnixTimeToLocalDateTimeOffset maxUnixTime
+        |> Option.isSome
+        |> should equal true
+
+    [<Fact>]
+    let ``下限の値はSomeを返す`` () =
+        tryUnixTimeToLocalDateTimeOffset minUnixTime
+        |> Option.isSome
+        |> should equal true
+
+    [<Fact>]
+    let ``上限を超える値はNoneを返す`` () =
+        tryUnixTimeToLocalDateTimeOffset (maxUnixTime + 1L) |> should equal None
+
+    [<Fact>]
+    let ``下限を下回る値はNoneを返す`` () =
+        tryUnixTimeToLocalDateTimeOffset (minUnixTime - 1L) |> should equal None

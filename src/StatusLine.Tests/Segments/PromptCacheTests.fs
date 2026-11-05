@@ -186,3 +186,35 @@ module Format =
                 .Color
 
         colorOf 0.1 |> should equal (colorOf 0.9)
+
+    [<Fact>]
+    let ``warmでHitRatioが1を超えるとき100パーセントの明るいコーラルにする`` () =
+        let segment = format (Some { warmCache with HitRatio = Some 1.2 })
+
+        segment |> text |> should equal (sprintf "🔥 100%% warm until %s" localTime)
+        segment |> spanOf "warm" |> rgb |> should equal (240, 128, 128)
+
+    [<Fact>]
+    let ``warmでHitRatioが負のとき0パーセントの暗いコーラルにする`` () =
+        let segment = format (Some { warmCache with HitRatio = Some -1.5 })
+
+        segment |> text |> should equal (sprintf "🔥 0%% warm until %s" localTime)
+        segment |> spanOf "warm" |> rgb |> should equal (120, 64, 64)
+
+    [<Fact>]
+    let ``coldでHitRatioが1を超えるとき100パーセントと表示する`` () =
+        format (Some { coldCache with HitRatio = Some 1.2 })
+        |> text
+        |> should equal "🧊 100% cold"
+
+    [<Fact>]
+    let ``ExpiresAtが日時の範囲外のときuntilを省く`` () =
+        // エポック秒ではなくエポックミリ秒が届いた場合
+        format (
+            Some {
+                warmCache with
+                    ExpiresAt = Some 1738422000000L
+            }
+        )
+        |> text
+        |> should equal "🔥 92% warm"
