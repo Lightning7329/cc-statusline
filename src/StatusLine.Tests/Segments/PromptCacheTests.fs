@@ -40,6 +40,10 @@ module internal Fixture =
     let spanOf (fragment: string) (segment: Segment option) =
         segment.Value |> List.find (fun span -> span.Text.Contains fragment)
 
+    let rgb (span: Span) =
+        let color = span.Color.Value
+        int color.R, int color.G, int color.B
+
 module Format =
     open Fixture
 
@@ -120,31 +124,61 @@ module Format =
         format (Some { warmCache with Warm = None }) |> should equal None
 
     [<Fact>]
-    let ``ラベルは無色にする`` () =
+    let ``warmのときラベルは無色にする`` () =
         (format (Some warmCache) |> spanOf "cache").Color |> should equal None
 
     [<Fact>]
-    let ``ヒット率100%のとき百分率を緑色にする`` () =
-        let span = format (Some { warmCache with HitRatio = Some 1.0 }) |> spanOf "%"
-
-        int span.Color.Value.R |> should equal 0
-        int span.Color.Value.G |> should equal 255
-        int span.Color.Value.B |> should equal 0
-
-    [<Fact>]
-    let ``ヒット率0%のとき百分率を赤色にする`` () =
-        let span = format (Some { warmCache with HitRatio = Some 0.0 }) |> spanOf "%"
-
-        int span.Color.Value.R |> should equal 255
-        int span.Color.Value.G |> should equal 0
-        int span.Color.Value.B |> should equal 0
+    let ``warmでヒット率100%のとき明るいコーラルにする`` () =
+        format (Some { warmCache with HitRatio = Some 1.0 })
+        |> spanOf "warm"
+        |> rgb
+        |> should equal (240, 128, 128)
 
     [<Fact>]
-    let ``warmの文字はLightGreenにする`` () =
-        (format (Some warmCache) |> spanOf "warm").Color
-        |> should equal (Some Color.LightGreen)
+    let ``warmでヒット率0%のとき暗いコーラルにする`` () =
+        format (Some { warmCache with HitRatio = Some 0.0 })
+        |> spanOf "warm"
+        |> rgb
+        |> should equal (120, 64, 64)
 
     [<Fact>]
-    let ``coldの文字はLightCoralにする`` () =
-        (format (Some coldCache) |> spanOf "cold").Color
-        |> should equal (Some Color.LightCoral)
+    let ``warmでヒット率50%のとき中間のコーラルにする`` () =
+        format (Some { warmCache with HitRatio = Some 0.5 })
+        |> spanOf "warm"
+        |> rgb
+        |> should equal (180, 96, 96)
+
+    [<Fact>]
+    let ``warmのとき百分率と状態と期限を同じ色にする`` () =
+        let segment = format (Some warmCache)
+
+        (segment |> spanOf "%").Color |> should equal (segment |> spanOf "until").Color
+        (segment |> spanOf "%").Color |> should equal (segment |> spanOf "warm").Color
+
+    [<Fact>]
+    let ``warmでHitRatioがNoneのとき明るいコーラルにする`` () =
+        format (Some { warmCache with HitRatio = None })
+        |> spanOf "warm"
+        |> rgb
+        |> should equal (240, 128, 128)
+
+    [<Fact>]
+    let ``coldのときラベルも含めて全体を灰色にする`` () =
+        format (Some coldCache)
+        |> _.Value
+        |> List.forall (fun span -> span.Color = Some Color.Gray)
+        |> should equal true
+
+    [<Fact>]
+    let ``coldのときヒット率に応じて色を変えない`` () =
+        let colorOf hitRatio =
+            (format (
+                Some {
+                    coldCache with
+                        HitRatio = Some hitRatio
+                }
+             )
+             |> spanOf "cold")
+                .Color
+
+        colorOf 0.1 |> should equal (colorOf 0.9)
