@@ -5,6 +5,16 @@ open System
 let unixTimeToLocalDateTimeOffset unixTime =
     unixTime |> DateTimeOffset.FromUnixTimeSeconds |> _.ToLocalTime()
 
+/// `DateTimeOffset` で表せない値は None を返す。
+let tryUnixTimeToLocalDateTimeOffset (unixTime: int64) : DateTimeOffset option =
+    if
+        unixTime >= DateTimeOffset.MinValue.ToUnixTimeSeconds()
+        && unixTime <= DateTimeOffset.MaxValue.ToUnixTimeSeconds()
+    then
+        Some(unixTimeToLocalDateTimeOffset unixTime)
+    else
+        None
+
 /// 経過時間を時・分・秒に分解した値。
 /// 日単位は作らず、Hours は青天井（24 以上にもなり得る）。
 type Duration = {

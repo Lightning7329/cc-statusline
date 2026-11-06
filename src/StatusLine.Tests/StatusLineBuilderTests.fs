@@ -708,10 +708,30 @@ module Build =
         firstRow.Split(" | ") |> Array.length |> should equal 3
 
     [<Fact>]
-    let ``RateLimitsが不在のときレート制限の行を出力しない`` () =
-        let c = { fullContext with RateLimits = None }
+    let ``RateLimitsとPromptCacheが不在のとき3行目を出力しない`` () =
+        let c = {
+            fullContext with
+                RateLimits = None
+                PromptCache = None
+        }
 
         build withBranch noHome c |> lines |> List.length |> should equal 2
+
+    [<Fact>]
+    let ``3行目の末尾にプロンプトキャッシュのセグメントが並ぶ`` () =
+        let rows = build withBranch noHome fullContext |> lines
+
+        // 3 行目 = 5h / 7d / cache。
+        rows[2].Split(" | ") |> Array.last |> should startWith "🔥 "
+
+    [<Fact>]
+    let ``RateLimitsが不在でもPromptCacheがあれば3行目を出力する`` () =
+        let c = { fullContext with RateLimits = None }
+
+        let rows = build withBranch noHome c |> lines
+
+        rows |> List.length |> should equal 3
+        rows[2] |> should startWith "🔥 "
 
     [<Fact>]
     let ``HOME配下のcwdはチルダ表記で始まる`` () =

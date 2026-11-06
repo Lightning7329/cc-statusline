@@ -21,6 +21,7 @@
     <Compile Include="Segments/SessionDurationTests.fs" />
     <Compile Include="Segments/ClaudeCodeVersionTests.fs" />
     <Compile Include="Segments/RateLimitTests.fs" />
+    <Compile Include="Segments/PromptCacheTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../StatusLine/StatusLine.fsproj" />
