@@ -15,7 +15,7 @@ let private brightCoral = Color.LightCoral
 /// ヒット率が低いほど暗く、高いほど明るいコーラルにする。
 let private coralByHitRatio (hitRatio: float) : Color =
     let mix (dim: byte) (bright: byte) =
-        int (Math.Round(float dim + float (int bright - int dim) * hitRatio))
+        int (Math.Round(float dim + (float bright - float dim) * hitRatio))
 
     Color.FromArgb(mix dimCoral.R brightCoral.R, mix dimCoral.G brightCoral.G, mix dimCoral.B brightCoral.B)
 
@@ -65,7 +65,5 @@ let format (promptCache: PromptCache option) : Segment option =
     |> Option.filter (fun cache -> cache.CachingObserved <> Some false)
     |> Option.map clampHitRatio
     |> Option.bind (fun cache ->
-        match cache.Warm with
-        | Some true -> Some(formatWarm cache)
-        | Some false -> Some(formatCold cache)
-        | None -> None)
+        cache.Warm
+        |> Option.map (fun warm -> if warm then formatWarm cache else formatCold cache))
