@@ -1,5 +1,6 @@
 module StatusLine.Tests.Segments.GitBranchTests
 
+open System.Drawing
 open System.IO
 open Xunit
 open FsUnit.Xunit
@@ -27,7 +28,7 @@ module Format =
     let ``gitリポジトリ内でブランチ名を返す`` () =
         withTempDir (fun dir git ->
             git "init -b test-branch"
-            format dir |> segmentText |> should equal $"{icon} test-branch")
+            format dir false |> segmentText |> should equal $"{icon} test-branch")
 
     [<Fact>]
     let ``detached HEAD時に短縮コミットハッシュを返す`` () =
@@ -36,8 +37,31 @@ module Format =
             git "-c user.name=test -c user.email=test@test commit --allow-empty -m init"
             let hash = tryRun dir "git" "rev-parse --short HEAD" |> Option.get
             git "checkout --detach"
-            format dir |> segmentText |> should equal $"{icon} {hash}")
+            format dir false |> segmentText |> should equal $"{icon} {hash}")
 
     [<Fact>]
     let ``gitリポジトリ外ではNoneを返す`` () =
-        withTempDir (fun dir _ -> format dir |> should equal None)
+        withTempDir (fun dir _ -> format dir false |> should equal None)
+
+module FormatBranch =
+    [<Fact>]
+    let ``worktree でないときブランチ名をグリーンにする`` () =
+        formatBranch false "main"
+        |> should equal [
+            { Text = $"{icon} "; Color = None }
+            {
+                Text = "main"
+                Color = Some(Color.FromArgb(140, 200, 140))
+            }
+        ]
+
+    [<Fact>]
+    let ``worktree のときブランチ名を水色にする`` () =
+        formatBranch true "main"
+        |> should equal [
+            { Text = $"{icon} "; Color = None }
+            {
+                Text = "main"
+                Color = Some(Color.FromArgb(110, 200, 200))
+            }
+        ]

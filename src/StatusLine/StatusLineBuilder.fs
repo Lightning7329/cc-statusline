@@ -52,11 +52,12 @@ let private concatRow (segments: Segment option list) : Segment option =
     | [] -> None
     | parts -> parts |> joinWith separator |> Some
 
-let build (formatBranch: string -> Segment option) (settings: Settings) (c: Context) : Segment =
+/// formatBranch は cwd と、linked worktree かどうか（`workspace.git_worktree` の有無）を受け取る
+let build (formatBranch: string -> bool -> Segment option) (settings: Settings) (c: Context) : Segment =
     [
         [
             Cwd.format settings.Home c.Workspace
-            formatBranch c.Cwd
+            formatBranch c.Cwd c.Workspace.GitWorktree.IsSome
             ModelName.format c.Model c.Effort
             ClaudeCodeVersion.format c.Version
         ]
@@ -89,7 +90,7 @@ let describeError (error: ContextDeserializeError) : string =
     | MissingOrInvalidField _ -> "missing or invalid field"
 
 let buildFromInput
-    (formatBranch: string -> Segment option)
+    (formatBranch: string -> bool -> Segment option)
     (settings: Settings)
     (input: string)
     : Result<Segment, ContextDeserializeError> =

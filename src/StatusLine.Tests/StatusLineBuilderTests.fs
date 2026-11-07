@@ -28,8 +28,10 @@ module internal Fixture =
         (text segment).Split('\n') |> Array.toList
 
     // 本番の副作用（git・環境変数）を置き換えるフェイク
-    let withBranch (_: string) = Some(GitBranch.formatBranch "main")
-    let noBranch (_: string) : Segment option = None
+    let withBranch (_: string) (isWorktree: bool) =
+        Some(GitBranch.formatBranch isWorktree "main")
+
+    let noBranch (_: string) (_: bool) : Segment option = None
     let noHome: Settings = { Home = None }
 
     // 全フィールドを含む最小限のベース JSON（sample.json 相当）
@@ -706,6 +708,32 @@ module Build =
         let firstRow = (build noBranch noHome fullContext |> lines)[0]
 
         firstRow.Split(" | ") |> Array.length |> should equal 3
+
+    [<Fact>]
+    let ``workspace.git_worktree があるとき formatBranch に worktree であることを渡す`` () =
+        let formatBranch (_: string) (isWorktree: bool) =
+            Some(Segment.fromText (if isWorktree then "worktree" else "normal"))
+
+        let c = {
+            fullContext with
+                Workspace = {
+                    fullContext.Workspace with
+                        GitWorktree = Some "my-feature"
+                }
+        }
+
+        let firstRow = (build formatBranch noHome c |> lines)[0]
+
+        firstRow.Split(" | ") |> Array.item 1 |> should equal "worktree"
+
+    [<Fact>]
+    let ``workspace.git_worktree がないとき formatBranch に worktree でないことを渡す`` () =
+        let formatBranch (_: string) (isWorktree: bool) =
+            Some(Segment.fromText (if isWorktree then "worktree" else "normal"))
+
+        let firstRow = (build formatBranch noHome fullContext |> lines)[0]
+
+        firstRow.Split(" | ") |> Array.item 1 |> should equal "normal"
 
     [<Fact>]
     let ``RateLimitsとPromptCacheが不在のとき3行目を出力しない`` () =
