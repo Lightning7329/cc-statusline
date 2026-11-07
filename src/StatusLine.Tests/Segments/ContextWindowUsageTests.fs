@@ -38,27 +38,31 @@ module FormatBar =
 
 module FormatTokens =
 
-    [<Fact>]
-    let ``1000未満はそのまま表示する`` () =
-        formatTokens 0 |> should equal "0"
-        formatTokens 999 |> should equal "999"
+    [<Theory>]
+    [<InlineData(0, "0")>]
+    [<InlineData(999, "999")>]
+    let ``1000未満はそのまま表示する`` (tokens: int, expected: string) =
+        formatTokens tokens |> should equal expected
 
-    [<Fact>]
-    let ``1000以上はkの単位で整数に切り捨てて表示する`` () =
-        formatTokens 1_000 |> should equal "1k"
-        formatTokens 120_456 |> should equal "120k"
-        formatTokens 200_000 |> should equal "200k"
-        formatTokens 999_999 |> should equal "999k"
+    [<Theory>]
+    [<InlineData(1_000, "1k")>]
+    [<InlineData(120_456, "120k")>]
+    [<InlineData(200_000, "200k")>]
+    [<InlineData(999_999, "999k")>]
+    let ``1000以上はkの単位で整数に切り捨てて表示する`` (tokens: int, expected: string) =
+        formatTokens tokens |> should equal expected
 
-    [<Fact>]
-    let ``1000000以上はMの単位で小数1桁に切り捨てて表示する`` () =
-        formatTokens 1_250_000 |> should equal "1.2M"
-        formatTokens 1_099_999 |> should equal "1M"
+    [<Theory>]
+    [<InlineData(1_250_000, "1.2M")>]
+    [<InlineData(1_099_999, "1M")>]
+    let ``1000000以上はMの単位で小数1桁に切り捨てて表示する`` (tokens: int, expected: string) =
+        formatTokens tokens |> should equal expected
 
-    [<Fact>]
-    let ``Mの小数部が0のときは整数で表示する`` () =
-        formatTokens 1_000_000 |> should equal "1M"
-        formatTokens 2_000_000 |> should equal "2M"
+    [<Theory>]
+    [<InlineData(1_000_000, "1M")>]
+    [<InlineData(2_000_000, "2M")>]
+    let ``Mの小数部が0のときは整数で表示する`` (tokens: int, expected: string) =
+        formatTokens tokens |> should equal expected
 
 module Format =
 
