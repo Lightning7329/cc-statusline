@@ -157,3 +157,37 @@ let ``effort がなく fast mode が無効なときはモデル名だけを表�
 
     // Assert
     result |> segmentText |> should equal "opus-5-5"
+
+[<Fact>]
+let ``effort の level が空文字のときは level を付けない`` () =
+    // Arrange
+    let model = {
+        Id = "claude-opus-5-5"
+        DisplayName = "Opus"
+    }
+
+    let effort = Some { Level = "" }
+    let fastMode = None
+
+    // Act
+    let result = format model effort fastMode
+
+    // Assert
+    result |> segmentText |> should equal "opus-5-5"
+
+[<Fact>]
+let ``effort の level が空文字で fast mode が有効なときは fast だけを表示する`` () =
+    // Arrange
+    let model = {
+        Id = "claude-opus-5-5"
+        DisplayName = "Opus"
+    }
+
+    let effort = Some { Level = "" }
+    let fastMode = Some true
+
+    // Act
+    let result = format model effort fastMode
+
+    // Assert
+    result |> segmentText |> should equal "opus-5-5 (fast)"

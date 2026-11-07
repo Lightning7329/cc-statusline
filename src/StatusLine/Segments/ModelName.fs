@@ -7,7 +7,11 @@ let format (model: Model) (effort: Effort option) (fastMode: bool option) : Segm
     let name = model.Id.Replace("claude-", "")
 
     let tags = [
-        yield! effort |> Option.map _.Level |> Option.toList
+        yield!
+            effort
+            |> Option.map _.Level
+            |> Option.filter (System.String.IsNullOrWhiteSpace >> not)
+            |> Option.toList
         if fastMode = Some true then
             "fast"
     ]
