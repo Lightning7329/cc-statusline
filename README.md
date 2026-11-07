@@ -68,7 +68,7 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 | Git branch        | Branch, or short hash when detached; cyan `(wt) branch` in worktree  |
 | Model name        | Active Claude model (e.g. `opus-4-8`, `sonnet-4-6`)                  |
 | Version           | Claude Code version (e.g. `v2.1.90`)                                 |
-| Context window    | Braille progress bar with usage percentage                           |
+| Context window    | Braille progress bar, usage percentage and tokens (`12% (120k/1M)`)  |
 | Lines changed     | Lines added / removed this session (`+156/-23`, green / red)         |
 | Cost              | Session cost in USD                                                  |
 | Session duration  | Elapsed wall-clock time this session (`⏳ 1h 12m 3s`)                |
