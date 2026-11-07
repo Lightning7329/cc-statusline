@@ -36,16 +36,43 @@ module FormatBar =
     let ``100超の値は100にクランプされる`` () =
         formatBar 120 |> should equal (formatBar 100)
 
+module FormatTokens =
+
+    [<Fact>]
+    let ``1000未満はそのまま表示する`` () =
+        formatTokens 0 |> should equal "0"
+        formatTokens 999 |> should equal "999"
+
+    [<Fact>]
+    let ``1000以上はkの単位で整数に切り捨てて表示する`` () =
+        formatTokens 1_000 |> should equal "1k"
+        formatTokens 120_456 |> should equal "120k"
+        formatTokens 200_000 |> should equal "200k"
+        formatTokens 999_999 |> should equal "999k"
+
+    [<Fact>]
+    let ``1000000以上はMの単位で小数1桁に切り捨てて表示する`` () =
+        formatTokens 1_250_000 |> should equal "1.2M"
+        formatTokens 1_099_999 |> should equal "1M"
+
+    [<Fact>]
+    let ``Mの小数部が0のときは整数で表示する`` () =
+        formatTokens 1_000_000 |> should equal "1M"
+        formatTokens 2_000_000 |> should equal "2M"
+
 module Format =
 
-    let private makeContextWindow usedPercentage = {
-        TotalInputTokens = 0
+    let private makeContextWindowWith totalInputTokens contextWindowSize usedPercentage = {
+        TotalInputTokens = totalInputTokens
         TotalOutputTokens = 0
-        ContextWindowSize = 200000
+        ContextWindowSize = contextWindowSize
         UsedPercentage = usedPercentage
         RemainingPercentage = None
         CurrentUsage = None
     }
+
+    let private makeContextWindow usedPercentage =
+        makeContextWindowWith 0 200000 usedPercentage
 
     [<Fact>]
     let ``Noneのとき0%を表示する`` () =
@@ -84,3 +111,21 @@ module Format =
         int span.Color.Value.R |> should equal 255
         int span.Color.Value.G |> should equal 0
         int span.Color.Value.B |> should equal 0
+
+    [<Fact>]
+    let ``使用量と上限のトークン数を括弧内に表示する`` () =
+        let seg = format (makeContextWindowWith 120_000 1_000_000 (Some 12))
+        (seg.Value |> List.last).Text |> should equal "⣿⣀         12% (120k/1M)"
+
+    [<Fact>]
+    let ``トークン数は%と同じ色のスパンに含まれる`` () =
+        let seg = format (makeContextWindowWith 120_000 1_000_000 (Some 12))
+        seg.Value |> List.length |> should equal 2
+
+        (seg.Value |> List.last).Color
+        |> should equal (format (makeContextWindow (Some 12))).Value.[1].Color
+
+    [<Fact>]
+    let ``TotalInputTokensが0のとき括弧ごと省く`` () =
+        let seg = format (makeContextWindowWith 0 200_000 (Some 0))
+        (seg.Value |> List.last).Text |> should equal "           0%"
