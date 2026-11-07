@@ -58,7 +58,7 @@ let build (formatBranch: string -> bool -> Segment option) (settings: Settings) 
         [
             Cwd.format settings.Home c.Workspace
             formatBranch c.Cwd c.Workspace.GitWorktree.IsSome
-            ModelName.format c.Model c.Effort
+            ModelName.format c.Model c.Effort c.FastMode
             ClaudeCodeVersion.format c.Version
         ]
         [
