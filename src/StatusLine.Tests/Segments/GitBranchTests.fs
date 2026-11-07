@@ -1,5 +1,6 @@
 module StatusLine.Tests.Segments.GitBranchTests
 
+open System.Drawing
 open System.IO
 open Xunit
 open FsUnit.Xunit
@@ -44,9 +45,16 @@ module Format =
 
 module FormatBranch =
     [<Fact>]
-    let ``worktree でないときブランチ名だけを返す`` () =
+    let ``worktree でないときアイコンとブランチ名を色なしで返す`` () =
         formatBranch false "main" |> should equal (Segment.fromText $"{icon} main")
 
     [<Fact>]
-    let ``worktree のときブランチ名の末尾に (wt) を付ける`` () =
-        formatBranch true "main" |> should equal (Segment.fromText $"{icon} main (wt)")
+    let ``worktree のときアイコンの後ろの (wt) とブランチ名を水色にする`` () =
+        formatBranch true "main"
+        |> should equal [
+            { Text = $"{icon} "; Color = None }
+            {
+                Text = "(wt) main"
+                Color = Some(Color.FromArgb(110, 200, 200))
+            }
+        ]
