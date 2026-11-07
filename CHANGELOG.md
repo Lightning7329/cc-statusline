@@ -6,6 +6,16 @@ This file is generated and maintained by
 
 New release entries are inserted below this preamble in reverse-chronological order.
 
+## [0.5.0](https://github.com/Lightning7329/cc-statusline/compare/v0.4.4...v0.5.0) (2026-11-07)
+
+
+### Features
+
+* worktree のセッションではブランチ名の前に (wt) を付けて水色にする ([#130](https://github.com/Lightning7329/cc-statusline/issues/130)) ([6266010](https://github.com/Lightning7329/cc-statusline/commit/626601026aad61619a3f151c6f7900b37e3431ed)), closes [#127](https://github.com/Lightning7329/cc-statusline/issues/127)
+* コンテキストウィンドウのセグメントに使用量と上限のトークン数を表示する ([#133](https://github.com/Lightning7329/cc-statusline/issues/133)) ([babdd8e](https://github.com/Lightning7329/cc-statusline/commit/babdd8ecec78c23a339cd5c9cfb9b429e92bfd6b)), closes [#123](https://github.com/Lightning7329/cc-statusline/issues/123)
+* プロンプトキャッシュのヒット率と warm / cold の状態のセグメントを追加 ([#126](https://github.com/Lightning7329/cc-statusline/issues/126)) ([b47a7bb](https://github.com/Lightning7329/cc-statusline/commit/b47a7bb1ecf605dc71eb4f4b7c018b4618c11bd2))
+* モデル名のセグメントに Fast mode の有効状態表示を追加 ([#132](https://github.com/Lightning7329/cc-statusline/issues/132)) ([6975034](https://github.com/Lightning7329/cc-statusline/commit/697503484ca57e68bbcc193ee1ac5714cca0e086)), closes [#124](https://github.com/Lightning7329/cc-statusline/issues/124)
+
 ## [0.4.4](https://github.com/Lightning7329/cc-statusline/compare/v0.4.3...v0.4.4) (2026-09-30)
 
 
