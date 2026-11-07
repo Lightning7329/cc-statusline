@@ -58,3 +58,17 @@ module FormatBranch =
                 Color = Some(Color.FromArgb(110, 200, 200))
             }
         ]
+
+module FormatWithRunner =
+    [<Fact>]
+    let ``worktree のとき runner の結果を (wt) 付きで返す`` () =
+        // Arrange
+        let runner (_: string) = Some "main"
+        let cwd = "/any"
+        let isWorktree = true
+
+        // Act
+        let result = formatWithRunner runner cwd isWorktree
+
+        // Assert
+        result |> should equal (Some(formatBranch true "main"))

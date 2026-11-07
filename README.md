@@ -62,18 +62,18 @@ curl -fsSL https://raw.githubusercontent.com/Lightning7329/cc-statusline/main/in
 
 ## Segments
 
-| Segment           | Description                                                          |
-| ----------------- | -------------------------------------------------------------------- |
-| Working directory | Current directory, shortened against project / added dirs / `$HOME`  |
+| Segment           | Description                                                                                                 |
+| ----------------- | ----------------------------------------------------------------------------------------------------------- |
+| Working directory | Current directory, shortened against project / added dirs / `$HOME`                                         |
 | Git branch        | Current branch name, or short commit hash when in detached HEAD; `(wt) branch` in cyan in a linked worktree |
-| Model name        | Active Claude model (e.g. `opus-4-8`, `sonnet-4-6`)                  |
-| Version           | Claude Code version (e.g. `v2.1.90`)                                 |
-| Context window    | Braille progress bar with usage percentage                           |
-| Lines changed     | Lines added / removed this session (`+156/-23`, green / red)         |
-| Cost              | Session cost in USD                                                  |
-| Session duration  | Elapsed wall-clock time this session (`⏳ 1h 12m 3s`)                |
-| Rate limit        | Remaining requests for context, 5-hour, and 7-day windows            |
-| Prompt cache      | Prompt cache hit ratio and state, see [below](#prompt-cache)         |
+| Model name        | Active Claude model (e.g. `opus-4-8`, `sonnet-4-6`)                                                         |
+| Version           | Claude Code version (e.g. `v2.1.90`)                                                                        |
+| Context window    | Braille progress bar with usage percentage                                                                  |
+| Lines changed     | Lines added / removed this session (`+156/-23`, green / red)                                                |
+| Cost              | Session cost in USD                                                                                         |
+| Session duration  | Elapsed wall-clock time this session (`⏳ 1h 12m 3s`)                                                       |
+| Rate limit        | Remaining requests for context, 5-hour, and 7-day windows                                                   |
+| Prompt cache      | Prompt cache hit ratio and state, see [below](#prompt-cache)                                                |
 
 ### Prompt cache
 

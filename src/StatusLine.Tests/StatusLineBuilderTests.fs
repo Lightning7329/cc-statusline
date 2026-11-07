@@ -32,6 +32,11 @@ module internal Fixture =
         Some(GitBranch.formatBranch isWorktree "main")
 
     let noBranch (_: string) (_: bool) : Segment option = None
+
+    /// 受け取った isWorktree を "worktree" / "normal" の文字列で返すフェイク
+    let worktreeProbe (_: string) (isWorktree: bool) =
+        Some(Segment.fromText (if isWorktree then "worktree" else "normal"))
+
     let noHome: Settings = { Home = None }
 
     // 全フィールドを含む最小限のベース JSON（sample.json 相当）
@@ -711,9 +716,6 @@ module Build =
 
     [<Fact>]
     let ``workspace.git_worktree があるとき formatBranch に worktree であることを渡す`` () =
-        let formatBranch (_: string) (isWorktree: bool) =
-            Some(Segment.fromText (if isWorktree then "worktree" else "normal"))
-
         let c = {
             fullContext with
                 Workspace = {
@@ -722,16 +724,13 @@ module Build =
                 }
         }
 
-        let firstRow = (build formatBranch noHome c |> lines)[0]
+        let firstRow = (build worktreeProbe noHome c |> lines)[0]
 
         firstRow.Split(" | ") |> Array.item 1 |> should equal "worktree"
 
     [<Fact>]
     let ``workspace.git_worktree がないとき formatBranch に worktree でないことを渡す`` () =
-        let formatBranch (_: string) (isWorktree: bool) =
-            Some(Segment.fromText (if isWorktree then "worktree" else "normal"))
-
-        let firstRow = (build formatBranch noHome fullContext |> lines)[0]
+        let firstRow = (build worktreeProbe noHome fullContext |> lines)[0]
 
         firstRow.Split(" | ") |> Array.item 1 |> should equal "normal"
 
