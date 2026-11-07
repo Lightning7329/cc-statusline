@@ -123,9 +123,14 @@ module Format =
         seg.Value |> List.length |> should equal 2
 
         (seg.Value |> List.last).Color
-        |> should equal (format (makeContextWindow (Some 12))).Value.[1].Color
+        |> should equal (Some(StatusLine.Utils.Color.percentageToColor 12.0))
 
     [<Fact>]
     let ``TotalInputTokensが0のとき括弧ごと省く`` () =
         let seg = format (makeContextWindowWith 0 200_000 (Some 0))
+        (seg.Value |> List.last).Text |> should equal "           0%"
+
+    [<Fact>]
+    let ``ContextWindowSizeが0のとき括弧ごと省く`` () =
+        let seg = format (makeContextWindowWith 5_000 0 (Some 0))
         (seg.Value |> List.last).Text |> should equal "           0%"

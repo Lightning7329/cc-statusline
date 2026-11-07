@@ -43,7 +43,7 @@ let format (contextWindow: ContextWindow) : Segment option =
 
     // TotalInputTokens is 0 before the first API response; omit the token counts until then.
     let tokens =
-        if contextWindow.TotalInputTokens > 0 then
+        if contextWindow.TotalInputTokens > 0 && contextWindow.ContextWindowSize > 0 then
             sprintf
                 " (%s/%s)"
                 (formatTokens contextWindow.TotalInputTokens)
