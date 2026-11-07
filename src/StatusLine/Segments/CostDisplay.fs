@@ -4,7 +4,7 @@ open System.Drawing
 open StatusLine.Types.Context
 open StatusLine.Types.App
 
-let private orange = Color.FromArgb(212, 162, 127)
+let private orange = Color.FromArgb(212, 162, 127) // rgb(212, 162, 127)
 
 let format (cost: Cost) : Segment option =
     Some [
