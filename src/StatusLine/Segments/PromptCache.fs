@@ -7,10 +7,8 @@ open StatusLine.Types.App
 
 let private warmLabel = "🔥 "
 let private coldLabel = "🧊 "
-/// rgb(120, 64, 64)
-let private dimCoral = Color.FromArgb(120, 64, 64)
-/// rgb(240, 128, 128)
-let private brightCoral = Color.LightCoral
+let private dimCoral = Color.FromArgb(120, 64, 64) // rgb(120, 64, 64)
+let private brightCoral = Color.LightCoral // rgb(240, 128, 128)
 
 /// ヒット率が低いほど暗く、高いほど明るいコーラルにする。
 let private coralByHitRatio (hitRatio: float) : Color =
