@@ -7,7 +7,7 @@ open StatusLine.Utils
 let private icon = char 0xE0A0 |> string
 
 /// linked worktree のブランチの色
-let private worktreeColor = Color.FromArgb(110, 200, 200)
+let private worktreeColor = Color.FromArgb(110, 200, 200) // rgb(110, 200, 200)
 
 /// 通常はアイコンとブランチ名を色なしで返す。
 /// linked worktree（`workspace.git_worktree` がある）なら、アイコンとブランチ名の間に `(wt)` を入れ、
