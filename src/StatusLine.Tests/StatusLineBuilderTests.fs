@@ -735,6 +735,17 @@ module Build =
         firstRow.Split(" | ") |> Array.item 1 |> should equal "normal"
 
     [<Fact>]
+    let ``fast_mode が有効なときモデル名のセグメントに渡す`` () =
+        let c = {
+            fullContext with
+                FastMode = Some true
+        }
+
+        let firstRow = (build withBranch noHome c |> lines)[0]
+
+        firstRow.Split(" | ") |> Array.item 2 |> should equal "opus-4-6 (high, fast)"
+
+    [<Fact>]
     let ``RateLimitsとPromptCacheが不在のとき3行目を出力しない`` () =
         let c = {
             fullContext with
