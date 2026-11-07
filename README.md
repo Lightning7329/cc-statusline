@@ -84,7 +84,7 @@ The 🔥 / 🧊 segment shows the state of Claude's prompt cache for the main co
 | `🔥 92% warm until 14:32` | The cache is warm and expires at 14:32                               |
 | `🧊 92% cold`             | The cache has gone cold, so the next request re-caches the conversation |
 
-`92%` is the share of input tokens read from the cache over the whole session, so it doesn't change when the cache goes cold. The segment is hidden until the first API response, and when prompt caching isn't reported.
+`92%` is the share of input tokens read from the cache over the whole session, so it doesn't change when the cache goes cold. The segment is hidden until the first API response, and when prompt caching isn't reported. It requires Claude Code v2.1.251 or later; on earlier versions the segment is simply hidden.
 
 ## Requirements
 
