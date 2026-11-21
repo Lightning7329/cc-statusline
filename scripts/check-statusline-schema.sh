@@ -5,8 +5,8 @@
 # 差分があれば次を行う。
 #   - スナップショットを最新のキー一覧で書き換える（先頭コメントに検出日と Claude Code の最新版を記録）
 #   - PR 本文用の Markdown を $BODY_FILE（未指定なら stdout）に書き出す
-#   - GitHub Actions 上では $GITHUB_OUTPUT に changed / version を書き出す
-# 差分がなければ何も書き換えずに終了する。
+#   - GitHub Actions 上では $GITHUB_OUTPUT に changed / version / added_count / removed_count を書き出す
+# 差分がなければ何も書き換えずに終了する（$GITHUB_OUTPUT には changed / key_count を書き出す）。
 # ドキュメントの構造変更などで抽出に失敗した場合は非 0 で終了する。
 
 set -euo pipefail
@@ -68,7 +68,10 @@ LC_ALL=C comm -23 "$work/known.txt" "$work/current.txt" >"$work/removed.txt"
 
 if [[ ! -s "$work/added.txt" && ! -s "$work/removed.txt" ]]; then
   echo "差分はありません" >&2
-  [[ -n "${GITHUB_OUTPUT:-}" ]] && echo "changed=false" >>"$GITHUB_OUTPUT"
+  if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
+    echo "changed=false" >>"$GITHUB_OUTPUT"
+    echo "key_count=$(wc -l <"$work/current.txt")" >>"$GITHUB_OUTPUT"
+  fi
   exit 0
 fi
 
@@ -135,4 +138,6 @@ rows=$(table_rows)
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
   echo "changed=true" >>"$GITHUB_OUTPUT"
   echo "version=$version" >>"$GITHUB_OUTPUT"
+  echo "added_count=$(wc -l <"$work/added.txt")" >>"$GITHUB_OUTPUT"
+  echo "removed_count=$(wc -l <"$work/removed.txt")" >>"$GITHUB_OUTPUT"
 fi

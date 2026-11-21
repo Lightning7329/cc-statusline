@@ -37,6 +37,7 @@ jobs:
         run: scripts/check-statusline-schema.sh
 
       - name: Create or update PR
+        id: pr
         if: steps.check.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -53,6 +54,10 @@ jobs:
             diff -q <(git show "FETCH_HEAD:$SNAPSHOT_PATH" | keys) <(keys <"$SNAPSHOT_PATH") >/dev/null &&
             [[ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')" ]]; then
             echo "open な PR に同じ差分が反映済みです"
+            {
+              echo "result=unchanged"
+              echo "url=$(gh pr list --head "$BRANCH" --state open --json url --jq '.[0].url')"
+            } >>"$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -68,6 +73,41 @@ jobs:
           pr=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
           if [[ -n "$pr" ]]; then
             gh pr edit "$pr" --title "$title" --body-file "$BODY_FILE"
+            result=updated
           else
             gh pr create --base "$BASE_BRANCH" --head "$BRANCH" --title "$title" --body-file "$BODY_FILE"
+            result=created
           fi
+
+          {
+            echo "result=$result"
+            echo "url=$(gh pr list --head "$BRANCH" --state open --json url --jq '.[0].url')"
+          } >>"$GITHUB_OUTPUT"
+
+      # 失敗時は出さない（原因は実行ログで確認する）
+      - name: Write step summary
+        env:
+          CHANGED: ${{ steps.check.outputs.changed }}
+          KEY_COUNT: ${{ steps.check.outputs.key_count }}
+          ADDED_COUNT: ${{ steps.check.outputs.added_count }}
+          REMOVED_COUNT: ${{ steps.check.outputs.removed_count }}
+          PR_RESULT: ${{ steps.pr.outputs.result }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+        run: |
+          set -euo pipefail
+
+          {
+            echo "## statusline スキーマのチェック結果"
+            echo
+            if [[ "$CHANGED" != "true" ]]; then
+              echo "差分はありません（抽出したキー: ${KEY_COUNT} 件）。"
+            else
+              echo "差分を検出しました: 追加 ${ADDED_COUNT} 件 / 削除 ${REMOVED_COUNT} 件"
+              echo
+              case "$PR_RESULT" in
+                created) echo "PR を作成しました: $PR_URL" ;;
+                updated) echo "PR を更新しました: $PR_URL" ;;
+                unchanged) echo "open な PR に同じ差分が反映済みのため、更新していません: $PR_URL" ;;
+              esac
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
