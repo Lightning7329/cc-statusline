@@ -61,13 +61,13 @@ jobs:
             exit 0
           fi
 
-          title="chore(schema): statusline の JSON スキーマに差分を検出 (Claude Code $VERSION)"
+          title="chore(schema): detect changes in the statusline JSON schema (Claude Code $VERSION)"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -C "$BRANCH"
           git add "$SNAPSHOT_PATH"
-          git commit -m "$title" -m "公式ドキュメントのキー一覧の差分を schema/statusline-keys.txt に反映。"
+          git commit -m "$title" -m "Apply the key list changes from the official docs to schema/statusline-keys.txt."
           git push --force origin "$BRANCH"
 
           pr=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
