@@ -47,27 +47,31 @@ jobs:
           set -euo pipefail
 
           keys() { grep -v -e '^#' -e '^$'; }
+          summary() { echo "$1" | tee -a "$GITHUB_STEP_SUMMARY"; }
+
+          url=$(gh pr list --head "$BRANCH" --state open --json url --jq '.[0].url // empty')
 
           # open な PR のブランチが同じキー集合を持っていれば、先頭コメント（検出日）だけの更新になるので何もしない
-          if git fetch --quiet origin "$BRANCH" 2>/dev/null &&
-            diff -q <(git show "FETCH_HEAD:$SNAPSHOT_PATH" | keys) <(keys <"$SNAPSHOT_PATH") >/dev/null &&
-            [[ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')" ]]; then
-            echo "open な PR に同じ差分が反映済みです"
+          if [[ -n "$url" ]] &&
+            git fetch --quiet origin "$BRANCH" 2>/dev/null &&
+            diff -q <(git show "FETCH_HEAD:$SNAPSHOT_PATH" | keys) <(keys <"$SNAPSHOT_PATH") >/dev/null; then
+            summary "Not updated; the open PR already contains the same changes: $url"
             exit 0
           fi
 
-          title="chore(schema): statusline の JSON スキーマに差分を検出 (Claude Code $VERSION)"
+          title="chore(schema): detect changes in the statusline JSON schema (Claude Code $VERSION)"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -C "$BRANCH"
           git add "$SNAPSHOT_PATH"
-          git commit -m "$title" -m "公式ドキュメントのキー一覧の差分を schema/statusline-keys.txt に反映。"
+          git commit -m "$title" -m "Apply the key list changes from the official docs to schema/statusline-keys.txt."
           git push --force origin "$BRANCH"
 
-          pr=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
-          if [[ -n "$pr" ]]; then
-            gh pr edit "$pr" --title "$title" --body-file "$BODY_FILE"
+          if [[ -n "$url" ]]; then
+            gh pr edit "$url" --title "$title" --body-file "$BODY_FILE"
+            summary "Updated PR: $url"
           else
-            gh pr create --base "$BASE_BRANCH" --head "$BRANCH" --title "$title" --body-file "$BODY_FILE"
+            url=$(gh pr create --base "$BASE_BRANCH" --head "$BRANCH" --title "$title" --body-file "$BODY_FILE")
+            summary "Created PR: $url"
           fi

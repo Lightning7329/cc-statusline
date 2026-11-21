@@ -6,7 +6,8 @@
 #   - スナップショットを最新のキー一覧で書き換える（先頭コメントに検出日と Claude Code の最新版を記録）
 #   - PR 本文用の Markdown を $BODY_FILE（未指定なら stdout）に書き出す
 #   - GitHub Actions 上では $GITHUB_OUTPUT に changed / version を書き出す
-# 差分がなければ何も書き換えずに終了する。
+# 差分がなければ何も書き換えずに終了する（$GITHUB_OUTPUT には changed を書き出す）。
+# GitHub Actions 上ではどちらの場合も $GITHUB_STEP_SUMMARY に結果の概要を書き出す。
 # ドキュメントの構造変更などで抽出に失敗した場合は非 0 で終了する。
 
 set -euo pipefail
@@ -37,7 +38,7 @@ awk '
   inblock                   { sub(/^> ?/, ""); print }
   END                       { if (!closed) exit 1 }
 ' "$work/docs.md" >"$work/schema.json" || {
-  echo "error: Full JSON schema の json ブロックが見つかりません（ドキュメントの構造が変わった可能性があります）" >&2
+  echo "error: json block under \"Full JSON schema\" not found (the docs structure may have changed)" >&2
   exit 1
 }
 
@@ -47,12 +48,12 @@ if ! jq -r '
   | map(if type == "number" then "[]" else . end)
   | reduce .[] as $p (""; if $p == "[]" then . + "[]" elif . == "" then $p else . + "." + $p end)
 ' "$work/schema.json" | LC_ALL=C sort -u >"$work/current.txt"; then
-  echo "error: Full JSON schema のブロックが JSON として解釈できません" >&2
+  echo "error: the \"Full JSON schema\" block is not valid JSON" >&2
   exit 1
 fi
 
 if [[ ! -s "$work/current.txt" ]]; then
-  echo "error: キーが 1 件も抽出できませんでした" >&2
+  echo "error: no keys were extracted" >&2
   exit 1
 fi
 
@@ -63,12 +64,24 @@ else
   : >"$work/known.txt"
 fi
 
+# GitHub Actions のステップサマリーに書き出す（後続ステップが追記できるよう見出しは先に出す）
+summary() {
+  [[ -n "${GITHUB_STEP_SUMMARY:-}" ]] || return 0
+  {
+    echo "## Statusline schema check"
+    echo
+    echo "$1"
+    echo
+  } >>"$GITHUB_STEP_SUMMARY"
+}
+
 LC_ALL=C comm -13 "$work/known.txt" "$work/current.txt" >"$work/added.txt"
 LC_ALL=C comm -23 "$work/known.txt" "$work/current.txt" >"$work/removed.txt"
 
 if [[ ! -s "$work/added.txt" && ! -s "$work/removed.txt" ]]; then
-  echo "差分はありません" >&2
+  echo "No differences found" >&2
   [[ -n "${GITHUB_OUTPUT:-}" ]] && echo "changed=false" >>"$GITHUB_OUTPUT"
+  summary "No differences found ($(wc -l <"$work/current.txt") keys extracted)."
   exit 0
 fi
 
@@ -88,7 +101,7 @@ bullets() {
     # shellcheck disable=SC2016 # バッククォートは Markdown のコード表記で、展開させない
     sed 's/.*/- `&`/' "$1"
   else
-    echo "なし"
+    echo "None"
   fi
 }
 
@@ -105,34 +118,38 @@ table_rows() {
 rows=$(table_rows)
 
 {
-  echo "公式ドキュメントの statusline JSON スキーマに、既知のキー一覧との差分を検出しました。"
+  echo "Detected differences between the statusline JSON schema in the official docs and the known key list."
   echo
-  echo "- 取得元: $DOCS_URL"
-  echo "- 検出日: $detected"
-  echo "- 検出時点の Claude Code 最新版（npm）: \`$version\`"
+  echo "- Source: $DOCS_URL"
+  echo "- Detected: $detected"
+  echo "- Latest Claude Code on npm at detection: \`$version\`"
   echo
-  echo "## 追加されたキー"
+  echo "## Added keys"
   echo
   bullets "$work/added.txt"
   echo
-  echo "## 削除されたキー"
+  echo "## Removed keys"
   echo
   bullets "$work/removed.txt"
   echo
-  echo "## ドキュメントのフィールド一覧表の該当行"
+  echo "## Matching rows in the docs field table"
   echo
   if [[ -n "$rows" ]]; then
     echo "| Field | Description |"
     echo "| :- | :- |"
     echo "$rows"
   else
-    echo "該当行なし（中間ノードのみの追加や、サブテーブルに記載されたフィールドは表に直接載らないことがあります）"
+    echo "No matching rows (added intermediate nodes, and fields documented in sub-tables, may not appear in the table directly)."
   fi
   echo
-  echo "このPRをマージすると、上記の差分が確認済みとして \`schema/statusline-keys.txt\` に取り込まれます。対応するかどうかは個別に Issue 化して判断してください。"
+  echo "Merging this PR records the changes above as reviewed in \`schema/statusline-keys.txt\`. Open a separate issue for each change to decide whether to support it."
 } >"$body_file"
 
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-  echo "changed=true" >>"$GITHUB_OUTPUT"
-  echo "version=$version" >>"$GITHUB_OUTPUT"
+  {
+    echo "changed=true"
+    echo "version=$version"
+  } >>"$GITHUB_OUTPUT"
 fi
+
+summary "Differences found: $(wc -l <"$work/added.txt") added / $(wc -l <"$work/removed.txt") removed"
