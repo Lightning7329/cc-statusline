@@ -69,8 +69,10 @@ LC_ALL=C comm -23 "$work/known.txt" "$work/current.txt" >"$work/removed.txt"
 if [[ ! -s "$work/added.txt" && ! -s "$work/removed.txt" ]]; then
   echo "No differences found" >&2
   if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-    echo "changed=false" >>"$GITHUB_OUTPUT"
-    echo "key_count=$(wc -l <"$work/current.txt")" >>"$GITHUB_OUTPUT"
+    {
+      echo "changed=false"
+      echo "key_count=$(wc -l <"$work/current.txt")"
+    } >>"$GITHUB_OUTPUT"
   fi
   exit 0
 fi
@@ -136,8 +138,10 @@ rows=$(table_rows)
 } >"$body_file"
 
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-  echo "changed=true" >>"$GITHUB_OUTPUT"
-  echo "version=$version" >>"$GITHUB_OUTPUT"
-  echo "added_count=$(wc -l <"$work/added.txt")" >>"$GITHUB_OUTPUT"
-  echo "removed_count=$(wc -l <"$work/removed.txt")" >>"$GITHUB_OUTPUT"
+  {
+    echo "changed=true"
+    echo "version=$version"
+    echo "added_count=$(wc -l <"$work/added.txt")"
+    echo "removed_count=$(wc -l <"$work/removed.txt")"
+  } >>"$GITHUB_OUTPUT"
 fi
