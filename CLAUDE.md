@@ -67,7 +67,7 @@ FSharp.SystemTextJson with `JsonNamingPolicy.SnakeCaseLower` for automatic snake
 
 ## Code style
 
-- Format F# with Fantomas 8.0.0 (`dotnet fantomas .`)
+- Format F# with Fantomas (version pinned in `.config/dotnet-tools.json`; `dotnet fantomas .`)
 - Bracket style: Stroustrup; max 2 consecutive blank lines (`.editorconfig`)
 
 ## Testing
