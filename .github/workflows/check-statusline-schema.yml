@@ -37,7 +37,6 @@ jobs:
         run: scripts/check-statusline-schema.sh
 
       - name: Create or update PR
-        id: pr
         if: steps.check.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -48,16 +47,15 @@ jobs:
           set -euo pipefail
 
           keys() { grep -v -e '^#' -e '^$'; }
+          summary() { echo "$1" | tee -a "$GITHUB_STEP_SUMMARY"; }
+
+          url=$(gh pr list --head "$BRANCH" --state open --json url --jq '.[0].url // empty')
 
           # open な PR のブランチが同じキー集合を持っていれば、先頭コメント（検出日）だけの更新になるので何もしない
-          if git fetch --quiet origin "$BRANCH" 2>/dev/null &&
-            diff -q <(git show "FETCH_HEAD:$SNAPSHOT_PATH" | keys) <(keys <"$SNAPSHOT_PATH") >/dev/null &&
-            [[ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')" ]]; then
-            echo "The open PR already contains the same changes"
-            {
-              echo "result=unchanged"
-              echo "url=$(gh pr list --head "$BRANCH" --state open --json url --jq '.[0].url')"
-            } >>"$GITHUB_OUTPUT"
+          if [[ -n "$url" ]] &&
+            git fetch --quiet origin "$BRANCH" 2>/dev/null &&
+            diff -q <(git show "FETCH_HEAD:$SNAPSHOT_PATH" | keys) <(keys <"$SNAPSHOT_PATH") >/dev/null; then
+            summary "Not updated; the open PR already contains the same changes: $url"
             exit 0
           fi
 
@@ -70,44 +68,10 @@ jobs:
           git commit -m "$title" -m "Apply the key list changes from the official docs to schema/statusline-keys.txt."
           git push --force origin "$BRANCH"
 
-          pr=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
-          if [[ -n "$pr" ]]; then
-            gh pr edit "$pr" --title "$title" --body-file "$BODY_FILE"
-            result=updated
+          if [[ -n "$url" ]]; then
+            gh pr edit "$url" --title "$title" --body-file "$BODY_FILE"
+            summary "Updated PR: $url"
           else
-            gh pr create --base "$BASE_BRANCH" --head "$BRANCH" --title "$title" --body-file "$BODY_FILE"
-            result=created
+            url=$(gh pr create --base "$BASE_BRANCH" --head "$BRANCH" --title "$title" --body-file "$BODY_FILE")
+            summary "Created PR: $url"
           fi
-
-          {
-            echo "result=$result"
-            echo "url=$(gh pr list --head "$BRANCH" --state open --json url --jq '.[0].url')"
-          } >>"$GITHUB_OUTPUT"
-
-      # 失敗時は出さない（原因は実行ログで確認する）
-      - name: Write step summary
-        env:
-          CHANGED: ${{ steps.check.outputs.changed }}
-          KEY_COUNT: ${{ steps.check.outputs.key_count }}
-          ADDED_COUNT: ${{ steps.check.outputs.added_count }}
-          REMOVED_COUNT: ${{ steps.check.outputs.removed_count }}
-          PR_RESULT: ${{ steps.pr.outputs.result }}
-          PR_URL: ${{ steps.pr.outputs.url }}
-        run: |
-          set -euo pipefail
-
-          {
-            echo "## Statusline schema check"
-            echo
-            if [[ "$CHANGED" != "true" ]]; then
-              echo "No differences found (${KEY_COUNT} keys extracted)."
-            else
-              echo "Differences found: ${ADDED_COUNT} added / ${REMOVED_COUNT} removed"
-              echo
-              case "$PR_RESULT" in
-                created) echo "Created PR: $PR_URL" ;;
-                updated) echo "Updated PR: $PR_URL" ;;
-                unchanged) echo "Not updated; the open PR already contains the same changes: $PR_URL" ;;
-              esac
-            fi
-          } | tee -a "$GITHUB_STEP_SUMMARY"

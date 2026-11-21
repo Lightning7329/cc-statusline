@@ -5,8 +5,9 @@
 # 差分があれば次を行う。
 #   - スナップショットを最新のキー一覧で書き換える（先頭コメントに検出日と Claude Code の最新版を記録）
 #   - PR 本文用の Markdown を $BODY_FILE（未指定なら stdout）に書き出す
-#   - GitHub Actions 上では $GITHUB_OUTPUT に changed / version / added_count / removed_count を書き出す
-# 差分がなければ何も書き換えずに終了する（$GITHUB_OUTPUT には changed / key_count を書き出す）。
+#   - GitHub Actions 上では $GITHUB_OUTPUT に changed / version を書き出す
+# 差分がなければ何も書き換えずに終了する（$GITHUB_OUTPUT には changed を書き出す）。
+# GitHub Actions 上ではどちらの場合も $GITHUB_STEP_SUMMARY に結果の概要を書き出す。
 # ドキュメントの構造変更などで抽出に失敗した場合は非 0 で終了する。
 
 set -euo pipefail
@@ -63,17 +64,24 @@ else
   : >"$work/known.txt"
 fi
 
+# GitHub Actions のステップサマリーに書き出す（後続ステップが追記できるよう見出しは先に出す）
+summary() {
+  [[ -n "${GITHUB_STEP_SUMMARY:-}" ]] || return 0
+  {
+    echo "## Statusline schema check"
+    echo
+    echo "$1"
+    echo
+  } >>"$GITHUB_STEP_SUMMARY"
+}
+
 LC_ALL=C comm -13 "$work/known.txt" "$work/current.txt" >"$work/added.txt"
 LC_ALL=C comm -23 "$work/known.txt" "$work/current.txt" >"$work/removed.txt"
 
 if [[ ! -s "$work/added.txt" && ! -s "$work/removed.txt" ]]; then
   echo "No differences found" >&2
-  if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-    {
-      echo "changed=false"
-      echo "key_count=$(wc -l <"$work/current.txt")"
-    } >>"$GITHUB_OUTPUT"
-  fi
+  [[ -n "${GITHUB_OUTPUT:-}" ]] && echo "changed=false" >>"$GITHUB_OUTPUT"
+  summary "No differences found ($(wc -l <"$work/current.txt") keys extracted)."
   exit 0
 fi
 
@@ -141,7 +149,7 @@ if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
   {
     echo "changed=true"
     echo "version=$version"
-    echo "added_count=$(wc -l <"$work/added.txt")"
-    echo "removed_count=$(wc -l <"$work/removed.txt")"
   } >>"$GITHUB_OUTPUT"
 fi
+
+summary "Differences found: $(wc -l <"$work/added.txt") added / $(wc -l <"$work/removed.txt") removed"
