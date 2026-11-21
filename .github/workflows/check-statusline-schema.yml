@@ -53,7 +53,7 @@ jobs:
           if git fetch --quiet origin "$BRANCH" 2>/dev/null &&
             diff -q <(git show "FETCH_HEAD:$SNAPSHOT_PATH" | keys) <(keys <"$SNAPSHOT_PATH") >/dev/null &&
             [[ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')" ]]; then
-            echo "open な PR に同じ差分が反映済みです"
+            echo "The open PR already contains the same changes"
             {
               echo "result=unchanged"
               echo "url=$(gh pr list --head "$BRANCH" --state open --json url --jq '.[0].url')"
@@ -97,17 +97,17 @@ jobs:
           set -euo pipefail
 
           {
-            echo "## statusline スキーマのチェック結果"
+            echo "## Statusline schema check"
             echo
             if [[ "$CHANGED" != "true" ]]; then
-              echo "差分はありません（抽出したキー: ${KEY_COUNT} 件）。"
+              echo "No differences found (${KEY_COUNT} keys extracted)."
             else
-              echo "差分を検出しました: 追加 ${ADDED_COUNT} 件 / 削除 ${REMOVED_COUNT} 件"
+              echo "Differences found: ${ADDED_COUNT} added / ${REMOVED_COUNT} removed"
               echo
               case "$PR_RESULT" in
-                created) echo "PR を作成しました: $PR_URL" ;;
-                updated) echo "PR を更新しました: $PR_URL" ;;
-                unchanged) echo "open な PR に同じ差分が反映済みのため、更新していません: $PR_URL" ;;
+                created) echo "Created PR: $PR_URL" ;;
+                updated) echo "Updated PR: $PR_URL" ;;
+                unchanged) echo "Not updated; the open PR already contains the same changes: $PR_URL" ;;
               esac
             fi
           } | tee -a "$GITHUB_STEP_SUMMARY"

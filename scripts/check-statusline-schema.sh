@@ -37,7 +37,7 @@ awk '
   inblock                   { sub(/^> ?/, ""); print }
   END                       { if (!closed) exit 1 }
 ' "$work/docs.md" >"$work/schema.json" || {
-  echo "error: Full JSON schema の json ブロックが見つかりません（ドキュメントの構造が変わった可能性があります）" >&2
+  echo "error: json block under \"Full JSON schema\" not found (the docs structure may have changed)" >&2
   exit 1
 }
 
@@ -47,12 +47,12 @@ if ! jq -r '
   | map(if type == "number" then "[]" else . end)
   | reduce .[] as $p (""; if $p == "[]" then . + "[]" elif . == "" then $p else . + "." + $p end)
 ' "$work/schema.json" | LC_ALL=C sort -u >"$work/current.txt"; then
-  echo "error: Full JSON schema のブロックが JSON として解釈できません" >&2
+  echo "error: the \"Full JSON schema\" block is not valid JSON" >&2
   exit 1
 fi
 
 if [[ ! -s "$work/current.txt" ]]; then
-  echo "error: キーが 1 件も抽出できませんでした" >&2
+  echo "error: no keys were extracted" >&2
   exit 1
 fi
 
@@ -67,7 +67,7 @@ LC_ALL=C comm -13 "$work/known.txt" "$work/current.txt" >"$work/added.txt"
 LC_ALL=C comm -23 "$work/known.txt" "$work/current.txt" >"$work/removed.txt"
 
 if [[ ! -s "$work/added.txt" && ! -s "$work/removed.txt" ]]; then
-  echo "差分はありません" >&2
+  echo "No differences found" >&2
   if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
     echo "changed=false" >>"$GITHUB_OUTPUT"
     echo "key_count=$(wc -l <"$work/current.txt")" >>"$GITHUB_OUTPUT"
