@@ -91,7 +91,7 @@ bullets() {
     # shellcheck disable=SC2016 # バッククォートは Markdown のコード表記で、展開させない
     sed 's/.*/- `&`/' "$1"
   else
-    echo "なし"
+    echo "None"
   fi
 }
 
@@ -108,31 +108,31 @@ table_rows() {
 rows=$(table_rows)
 
 {
-  echo "公式ドキュメントの statusline JSON スキーマに、既知のキー一覧との差分を検出しました。"
+  echo "Detected differences between the statusline JSON schema in the official docs and the known key list."
   echo
-  echo "- 取得元: $DOCS_URL"
-  echo "- 検出日: $detected"
-  echo "- 検出時点の Claude Code 最新版（npm）: \`$version\`"
+  echo "- Source: $DOCS_URL"
+  echo "- Detected: $detected"
+  echo "- Latest Claude Code on npm at detection: \`$version\`"
   echo
-  echo "## 追加されたキー"
+  echo "## Added keys"
   echo
   bullets "$work/added.txt"
   echo
-  echo "## 削除されたキー"
+  echo "## Removed keys"
   echo
   bullets "$work/removed.txt"
   echo
-  echo "## ドキュメントのフィールド一覧表の該当行"
+  echo "## Matching rows in the docs field table"
   echo
   if [[ -n "$rows" ]]; then
     echo "| Field | Description |"
     echo "| :- | :- |"
     echo "$rows"
   else
-    echo "該当行なし（中間ノードのみの追加や、サブテーブルに記載されたフィールドは表に直接載らないことがあります）"
+    echo "No matching rows (added intermediate nodes, and fields documented in sub-tables, may not appear in the table directly)."
   fi
   echo
-  echo "このPRをマージすると、上記の差分が確認済みとして \`schema/statusline-keys.txt\` に取り込まれます。対応するかどうかは個別に Issue 化して判断してください。"
+  echo "Merging this PR records the changes above as reviewed in \`schema/statusline-keys.txt\`. Open a separate issue for each change to decide whether to support it."
 } >"$body_file"
 
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
